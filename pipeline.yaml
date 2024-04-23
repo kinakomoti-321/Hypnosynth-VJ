@@ -1,2 +1,14 @@
 stages:
   - fs: "./shaders/scene.glsl"
+    target: "tex"
+
+  # - fs: "./shaders/CellerAutomaton.glsl"
+  #   target: "celler"
+
+  - fs: "./shaders/post.glsl"
+    uniforms:
+      tint: [0.8, 0.9, 1.2]
+
+images:
+   - path: "./img/Plot.png"
+     name: "PlotLogo"

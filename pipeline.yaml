@@ -1,14 +1,25 @@
 stages:
-  - fs: "./shaders/scene.glsl"
-    target: "tex"
+  - fs: "./shaders/scene1.glsl"
+    target: "scene1"
 
   # - fs: "./shaders/CellerAutomaton.glsl"
   #   target: "celler"
 
-  - fs: "./shaders/post.glsl"
+  - fs: "./shaders/combine_layer.glsl"
+    target: "combine_layer"
+
+  - fs: "./shaders/bloom_layer.glsl"
+    target: "bloom_layer"
+
+  - fs: "./shaders/bloom_layer_gauss.glsl"
+    target: "bloom_gauss"
+
+  - fs: "./shaders/postEffect_layer.glsl"
     uniforms:
       tint: [0.8, 0.9, 1.2]
 
 images:
    - path: "./img/Plot.png"
      name: "PlotLogo"
+  #  - path: "./img/VAT_pos_test.exr"
+  #    name: "VAT"

@@ -4,6 +4,9 @@ stages:
 
   # - fs: "./shaders/CellerAutomaton.glsl"
   #   target: "celler"
+  
+  - fs: "./shaders/raytracing.glsl"
+    target: "raytracing"
 
   - fs: "./shaders/combine_layer.glsl"
     target: "combine_layer"

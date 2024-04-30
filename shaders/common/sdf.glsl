@@ -18,6 +18,12 @@ float sdLink( vec3 p, float le, float r1, float r2 )
   return length(vec2(length(q.xy)-r1,q.z)) - r2;
 }
 
+float sdPlane( vec3 p, vec3 n, float h )
+{
+  return dot(p,n) + h;
+}
+
+
 //2D SDF
 //https://iquilezles.org/articles/distfunctions2d/
 float sdBox( in vec2 p, in vec2 b )

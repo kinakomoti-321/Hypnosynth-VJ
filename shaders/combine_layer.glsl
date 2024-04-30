@@ -10,6 +10,7 @@
 
 
 uniform sampler2D scene1;
+uniform sampler2D raytracing;
 
 out vec4 Out_color;
 
@@ -18,5 +19,6 @@ void main() {
     vec2 texuv = gl_FragCoord.xy / resolution.xy;
 
     vec4 color = texture(scene1,texuv);
+    color = texture(raytracing,texuv);
     Out_color = color;
 }

@@ -7,6 +7,11 @@ stages:
   
   - fs: "./shaders/raytracing.glsl"
     target: "raytracing"
+    float: true
+
+  - fs: "./shaders/accumulate_layer.glsl"
+    target: "accumulate_layer"
+    float: true
 
   - fs: "./shaders/combine_layer.glsl"
     target: "combine_layer"
@@ -17,9 +22,10 @@ stages:
   - fs: "./shaders/bloom_layer_gauss.glsl"
     target: "bloom_gauss"
 
+  - fs: "./shaders/bloom_layer_combine.glsl"
+    target: "bloom_combine"
+
   - fs: "./shaders/postEffect_layer.glsl"
-    uniforms:
-      tint: [0.8, 0.9, 1.2]
 
 images:
    - path: "./img/Plot.png"

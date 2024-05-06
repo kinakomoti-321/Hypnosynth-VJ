@@ -13,13 +13,13 @@ mat3 getOrthogonalBasis(vec3 direction){
     return mat3(right,up,direction);
 }
 
-float cyclicNoise(vec3 p){
+float cyclicNoise(vec3 p,int octaves){
     float noise = 0.;
     
     float amp = 1.;
     const float gain = 0.6;
     const float lacunarity = 1.5;
-    const int octaves = 8;
+    //octaves = 4;
     
     const float warp = 0.3;    
     float warpTrk = 1.2 ;

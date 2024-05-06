@@ -157,3 +157,5 @@ vec4 hash44( vec4 p )
     return vec4(x)*(1.0/float(0xffffffffU));
 }
 
+
+#define RangeHash11(x,a,b) mix(a,b,hash11(x))

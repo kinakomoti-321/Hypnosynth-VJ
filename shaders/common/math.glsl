@@ -1,7 +1,21 @@
+#pragma include "./shaders/common/constant.glsl"
+
+#define saturate(x) clamp(x,0.0,1.0)
+
+#define repeat(x,a) mod(x,a) - a * 0.5;
 
 mat2 rot(float a){
     return mat2(cos(a),-sin(a),sin(a),cos(a));
 }
+
+//Rotate
+vec2 rotate(vec2 v, float a) {
+    float s = sin(a);
+    float c = cos(a);
+    mat2 m = mat2(c, -s, s, c);
+    return m * v;
+}
+
 
 //https://iquilezles.org/articles/smin/
 vec2 smoothMin(float a, float b, float k){
@@ -10,4 +24,19 @@ vec2 smoothMin(float a, float b, float k){
     float m = w*0.5;
     float s = w*k; 
     return (a<b) ? vec2(a-s,m) : vec2(b-s,1.0-m);
+}
+
+vec2 kaleido_pmod(vec2 p, float r)
+{
+    float a = atan(-p.x, -p.y) + PI;
+
+    float n = TAU / r;
+    float ID = floor(a / n);
+
+    p.x *= (int(ID) % 2 == 0) ? 1.0 : -1.0;
+    float b = atan(-p.x, -p.y) + PI;
+    ID = floor(b/n);
+    b = ID*n;
+
+    return rotate(p,-b);
 }

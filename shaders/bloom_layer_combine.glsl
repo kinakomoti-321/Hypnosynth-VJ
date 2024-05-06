@@ -9,22 +9,25 @@
 #pragma include "./shaders/common/benri.glsl"
 #pragma include "./shaders/common/filter.glsl"
 
+uniform sampler2D combine_layer;
+// uniform sampler2D bloom_layer;
+uniform sampler2D bloom_gauss;
+
 out vec4 Out_color;
+uniform vec3 tint;
 
-uniform sampler2D bloom_combine;
-
-#define Inverse_Button buttons[18]
-#define Laplacian_Button buttons[19]
 
 void main() {
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
     vec2 texuv = gl_FragCoord.xy / resolution.xy;
-    vec2 offsets = 1.0 / resolution.xy;
+    vec3 col = texture(combine_layer, texuv).xyz;
 
-    vec3 col = texture(bloom_combine, texuv).xyz;
+    vec2 uv_offset = 1.0 / resolution.xy;
+    uv_offset.x = 0;
+    float sigma = 20.0;
+   vec3 bloom_light = gaussian_blur(bloom_gauss,texuv,uv_offset,sigma) * 0.5;
 
-    if(ToggleB(Laplacian_Button.w)){
-        col = Laplacian_filter(bloom_combine,texuv,offsets);
-    }
+    col += bloom_light * 2.0;
+
     Out_color = vec4(col,1.0);
 }

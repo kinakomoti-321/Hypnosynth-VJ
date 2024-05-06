@@ -15,6 +15,8 @@ uniform sampler2D PlotLogo;
 #define BPM 150
 #define Beat time * BPM / 60
 
+uniform sampler2D VAT_test;
+
 vec3 getNormal(vec2 uv,float offset,int octaves){
     vec2 eps = vec2(0.001,0.0);
     int dammy = 0;
@@ -95,6 +97,8 @@ void main() {
     back_ground *= back_mask * sliders[1];
 
     col = mix(back_ground,vec3(1.0),plogo.w);
+
+    col = texture(VAT_test,tuv).xyz;
 
     color = vec4(col,1.0);
 }

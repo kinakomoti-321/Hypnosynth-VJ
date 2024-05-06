@@ -12,10 +12,12 @@
 uniform sampler2D scene1;
 uniform sampler2D raytracing;
 uniform sampler2D accumulate_layer;
+uniform sampler2D vertex;
 
 out vec4 Out_color;
 
 #define Raytracing_Button buttons[9]
+#define Vertex_Button buttons[3]
 
 void main() {
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
@@ -29,6 +31,8 @@ void main() {
         accumu.xyz /= accumu.a;
         color = accumu;
     }
-    
+
+    color = texture(vertex,texuv);
+
     Out_color = color;
 }

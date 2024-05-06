@@ -311,7 +311,11 @@ void main(){
 
     vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w),0.5 * sliders[0]);
 
-    vec3 col = pathtrace(ro,rd);
+    vec3 col = vec3(0.0);
+    
+    if(ToggleB(Raytracing_Button.w)){
+        col = pathtrace(ro,rd);
+    }
 
     vec4 accmu_tex = texture(raytracing,tuv);
     vec4 finish_col = vec4(col,1.0);

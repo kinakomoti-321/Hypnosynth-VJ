@@ -19,6 +19,7 @@ uniform sampler2D bloom_combine;
 void main() {
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
     vec2 texuv = gl_FragCoord.xy / resolution.xy;
+    
     vec2 offsets = 1.0 / resolution.xy;
 
     vec3 col = texture(bloom_combine, texuv).xyz;

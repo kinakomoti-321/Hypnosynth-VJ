@@ -1,7 +1,14 @@
 stages:
+  - vs: "./shaders/vertex.glsl"
+    mode: "LINE_STRIP"
+    line_width: 2
+    count: 1000
+    target: "vertex"
+    
   - fs: "./shaders/scene1.glsl"
     target: "scene1"
 
+  
   # - fs: "./shaders/CellerAutomaton.glsl"
   #   target: "celler"
   
@@ -30,5 +37,6 @@ stages:
 images:
    - path: "./img/Plot.png"
      name: "PlotLogo"
-  #  - path: "./img/VAT_pos_test.exr"
-  #    name: "VAT"
+   - path: "./img/VAT_Umishida.png"
+     name: "VAT_test"
+     filter: nearest

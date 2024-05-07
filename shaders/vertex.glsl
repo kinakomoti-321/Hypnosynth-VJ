@@ -16,6 +16,7 @@ uniform sampler2D VAT_test;
 
 uniform vec4 VAT_test_res;
 
+#define VertexRrandomSlider sliders[0]
 float ConvertBinaryToFloat(vec4 binary_col){
     uint b1 = uint(binary_col.r * 255.0);
     uint b2 = uint(binary_col.g * 255.0);
@@ -57,7 +58,6 @@ vec3 GetVATPosition(uint vertID){
 
 void main() {
     float factor = float(gl_VertexID) / vertex_count;
-    float far_clip = 1.0;
 
     vec3 test = hash31(float(gl_VertexID));
 
@@ -68,10 +68,14 @@ void main() {
     int maxVertID =  int(time);
     int VertID = (gl_VertexID < maxVertID) ? gl_VertexID : maxVertID ;
 
-    vec3 p =GetVATPosition(uint(VertID)) * 0.2;
-    p.xz = rotate(p.xz,time);
+    vec3 rand = easeHash31(b_beat.w,b_beat.y,10);
+    vec3 p =GetVATPosition(uint(VertID)) * 0.4;
+    p += stepFunc(VertexRrandomSlider,0.25) * (hash34(vec4(p,floor(time))) * 2.0 - 1.0);
+    p.xz = rotate(p.xz,rand.y * TAU * 1.5 + time * 0.1);
+    p.yz = rotate(p.yz,rand.x * TAU * 1.5);
 
-
+    float far_clip = 1.0 * rand.z;
+    p.z -= rand.z;
     vec3 proj_p = vec3(p.xy,p.z/far_clip);
     proj_p.xy *= (1.0 - proj_p.z);
     gl_Position = vec4(proj_p, 1.0);

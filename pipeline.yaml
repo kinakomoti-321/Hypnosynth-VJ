@@ -16,6 +16,9 @@ stages:
     target: "raytracing"
     float: true
 
+  - fs: "./shaders/logo.glsl"
+    target: "logo_layer"
+
   - fs: "./shaders/accumulate_layer.glsl"
     target: "accumulate_layer"
     float: true

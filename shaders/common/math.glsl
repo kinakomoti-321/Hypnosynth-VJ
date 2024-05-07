@@ -4,6 +4,7 @@
 
 #define repeat(x,a) mod(x,a) - a * 0.5;
 
+#define stepFunc(x,a) floor(x / a) * a
 mat2 rot(float a){
     return mat2(cos(a),-sin(a),sin(a),cos(a));
 }

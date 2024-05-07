@@ -17,20 +17,26 @@ uniform sampler2D vertex;
 
 out vec4 Out_color;
 
+#define Scene1Button buttons[3]
+
 void main() {
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
     vec2 texuv = gl_FragCoord.xy / resolution.xy;
 
-    vec4 color = texture(scene1,texuv);
-    // color = texture(raytracing,texuv);
-    // color.xyz /= color.a;
+    vec4 color = texture(vertex,texuv);
+
+    if(ToggleB(Scene1Button.w)){
+        color = texture(scene1,texuv);
+    }
+
     if(ToggleB(Raytracing_Button.w)){
         vec4 accumu = texture(accumulate_layer,texuv);
         accumu.xyz /= accumu.a;
         color = accumu;
     }
 
-    color = texture(vertex,texuv);
-
+    //float p = NoiseSlider;
+    //color =  (p < hash13(vec3(time,uv))) ? vec4(hash13(vec3(uv,time))) : color;
+    
     Out_color = color;
 }

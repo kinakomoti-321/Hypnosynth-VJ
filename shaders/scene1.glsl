@@ -17,6 +17,10 @@ uniform sampler2D PlotLogo;
 
 uniform sampler2D VAT_test;
 
+#define LogoSlider sliders[2]
+#define LogoButton1 buttons[4]
+
+
 vec3 getNormal(vec2 uv,float offset,int octaves){
     vec2 eps = vec2(0.001,0.0);
     int dammy = 0;
@@ -44,6 +48,8 @@ void main() {
     //------------
     //Front
     //------------
+
+    int logo_index = int(LogoSlider * 5.0f);
     float beatTime = floor(time * 10.0 + 1.0);
     float beatTimef = fract(time * 10.0 + 1.0);
     vec2 logouv = tuv * 2.0 - 1.0;
@@ -51,7 +57,14 @@ void main() {
     logouv += ((hash21(beatTime) * 2.0 - 1.0) * sliders[0]) * (beatTimef * 0.2 + 0.8);
     logouv = logouv * 0.5 + 0.5 ;
     //なんかいい感じ
-    vec4 plogo = texture(PlotLogo,logouv+ offsetCurl((uv) * 5.0,0.5 * Toggle(buttons[1].w)));
+    vec4 plogo = vec4(0);
+
+    if(logo_index == 0){
+        plogo = texture(PlotLogo,logouv);
+    }
+    else if(logo_index == 1){
+       plogo = texture(PlotLogo,logouv+ offsetCurl((uv) * 5.0,0.5 ));
+    }
 
     //------------
     //Back
@@ -87,9 +100,6 @@ void main() {
     mask_uv.x = repeat(mask_uv.x,1);
     sdf_mask = sdEquilateralTriangle(mask_uv,0.3);
 
-    // mask_uv.x = repeat(mask_uv.x,0.7);
-    // sdf_mask = sdEquilateralTriangle(mask_uv,0.3);
-
     if(sdf_mask < 0.0){
         back_mask = vec3(1.0);
     }
@@ -97,8 +107,6 @@ void main() {
     back_ground *= back_mask * sliders[1];
 
     col = mix(back_ground,vec3(1.0),plogo.w);
-
-    col = texture(VAT_test,tuv).xyz;
 
     color = vec4(col,1.0);
 }

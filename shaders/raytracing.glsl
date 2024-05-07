@@ -309,7 +309,7 @@ void main(){
     vec3 ro = mix(prePos,nowPos, vec3(clamp(powEase(b_beat.y,20.0),0.0,1.0)));
     vec3 atlook = vec3(0.0);
 
-    vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w),0.5 * sliders[0]);
+    vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w),0.001);
 
     vec3 col = vec3(0.0);
     

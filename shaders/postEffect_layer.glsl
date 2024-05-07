@@ -13,9 +13,6 @@ out vec4 Out_color;
 
 uniform sampler2D bloom_combine;
 
-#define Laplacian_Button buttons[21]
-#define NoiseSlider sliders[14]
-#define AbsorbSlider sliders[15]
 
 void main() {
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;

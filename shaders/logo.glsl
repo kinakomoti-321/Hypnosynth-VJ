@@ -90,7 +90,5 @@ void main() {
 
     col = mix(back_ground,vec3(1.0),plogo.w);
 
-    col = texture(VAT_test,tuv).xyz;
-
     color = vec4(col,1.0);
 }

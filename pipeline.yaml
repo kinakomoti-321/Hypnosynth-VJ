@@ -23,6 +23,9 @@ stages:
     target: "accumulate_layer"
     float: true
 
+  - fs: "./shaders/tv.glsl"
+    target: "tv_layer"
+
   - fs: "./shaders/combine_layer.glsl"
     target: "combine_layer"
 

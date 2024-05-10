@@ -14,6 +14,9 @@ uniform sampler2D accumulate_layer;
 uniform sampler2D scene1;
 uniform sampler2D logo_layer;
 uniform sampler2D vertex;
+uniform sampler2D tv_layer;
+
+uniform sampler2D combine_layer;
 
 out vec4 Out_color;
 
@@ -38,5 +41,21 @@ void main() {
     //float p = NoiseSlider;
     //color =  (p < hash13(vec3(time,uv))) ? vec4(hash13(vec3(uv,time))) : color;
     
+    // color = texture(tv_layer,texuv);     
+    vec2 dxy = 1.0/resolution.xy;
+    
+    if(ToggleB(buttons[18].w) && ToggleB(b_beat.w)){
+        float d1,d2;
+        vec2 idx;
+        ManhattanVoronoi2D(vec2(uv * 5.0 + floor(time) * 10.0),d1,d2,idx);
+        vec2 velo = hash22(idx + vec2(100.0)) * 2.0 -1.0;
+        ivec2 velo_int = ivec2(velo * sliders[12] * (100.0 + b_beat.y)  );
+
+        color = texture(combine_layer,mod(texuv + vec2(velo_int * dxy),1.0));
+    }
+
+
+
+
     Out_color = color;
 }

@@ -46,5 +46,40 @@ void main() {
         vec2 offsets = 1.0 / resolution.xy;
         col = Laplacian_filter(bloom_combine,texuv,offsets);
     }
+
+
+    if(ToggleB(buttons[19].w)){
+        vec2 dxy = 1.0 / resolution.xy; 
+        vec3 maxCol = vec3(0);
+        int idx = 0;
+        int Radius = 100;
+        for(int i = 0; i < Radius; i++){
+            int dir_id = int(sliders[13] * 3.0);
+            ivec2 dir[4] = {ivec2(0,i),ivec2(i,0),ivec2(0,-i),ivec2(-i,0)};
+            ivec2 neighborCoordinate = ivec2(gl_FragCoord.xy) + dir[dir_id];
+            vec2 tuv = vec2(neighborCoordinate) / resolution.xy;
+            vec3 texCol = texture(bloom_combine,tuv).xyz;
+            if(length(maxCol) < length(texCol)){
+                maxCol = texCol;
+                idx = i;
+            }
+        }
+        col = maxCol * (Radius - idx) / Radius;
+    }
+
+
+
+    // float d1,d2;
+    // vec3 idx;
+    // ChevishevVoronoi3D(vec3(uv * 10.0,0),d1,d2,idx);
+
+    // col = vec3(d1);
+
+    // float d1,d2;
+    // vec2 idx;
+    // ManhattanVoronoi2D(vec2(uv * 5.0),d1,d2,idx);
+    // col = hash32(idx); 
+
+
     Out_color = vec4(col,1.0);
 }

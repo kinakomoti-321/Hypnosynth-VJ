@@ -110,19 +110,19 @@ bool raymarching(vec3 ro,vec3 rd,inout IntersectInfo info){
     return false;
 }
 
-void tangentSpaceBasis(vec3 normal,inout vec3 t,inout vec3 b){
-    if (abs(normal.y) < 0.9)
-    {
-        t = cross(normal, vec3(0, 1, 0));
-    }
-    else
-    {
-        t = cross(normal, vec3(0, 0, -1));
-    }
-    t = normalize(t);
-    b = cross(t, normal);
-    b = normalize(b);
-}
+// void tangentSpaceBasis(vec3 normal,inout vec3 t,inout vec3 b){
+//     if (abs(normal.y) < 0.9)
+//     {
+//         t = cross(normal, vec3(0, 1, 0));
+//     }
+//     else
+//     {
+//         t = cross(normal, vec3(0, 0, -1));
+//     }
+//     t = normalize(t);
+//     b = cross(t, normal);
+//     b = normalize(b);
+// }
 
 vec3 worldtoLoacal(vec3 v,vec3 lx, vec3 ly,vec3 lz){
     return vec3(v.x * lx.x + v.y* lx.y + v.z * lx.z,
@@ -280,18 +280,6 @@ vec3 pathtrace(vec3 ro,vec3 rd){
     return LTE;
 }
 
-vec3 GetCameraDir(vec3 camera_ori,vec3 at_look, vec2 uv ,float Fov,float DOF)
-{
-    vec3 camera_dir = normalize(at_look - camera_ori);
-    float f = 1.0 / atan(Fov * TAU / 360.0f);
-
-    vec3 tangent,binormal;
-    tangentSpaceBasis(camera_dir,tangent,binormal);
-    vec2 jitter = (rnd2()*2.0 - 1.0) * DOF;
-    camera_dir = normalize(camera_dir * f + (uv.x + jitter.x) * tangent + (uv.y + jitter.y) * binormal );
-    return camera_dir;
-}
-
 void main(){
     seed = uint(time * 64) * uint(gl_FragCoord.x + gl_FragCoord.y * resolution.x);
     vec2 uv = ((gl_FragCoord.xy + rnd2()) - resolution.xy * 0.5) / resolution.y;
@@ -309,7 +297,7 @@ void main(){
     vec3 ro = mix(prePos,nowPos, vec3(clamp(powEase(b_beat.y,20.0),0.0,1.0)));
     vec3 atlook = vec3(0.0);
 
-    vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w),0.001);
+    vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w),0.001,rnd2());
 
     vec3 col = vec3(0.0);
     

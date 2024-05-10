@@ -132,4 +132,67 @@ vec2 curlNoise2D(vec2 p){
     return vec2(dy,-dx);
 }
 
+// Vorornoi
+float ChevishevDist(vec3 p){
+   return max(abs(p.x),max(abs(p.y),abs(p.z)));
+}
+
+float Manhattan2D(vec2 p){ return abs(p.x) + abs(p.y);}
+
+void ChevishevVoronoi3D(vec3 p,inout float d1,inout float d2,inout vec3 idx){
+    vec3 cellPos = floor(p);
+    vec3 localPos = p - cellPos; 
+    d1 = 100.0;
+
+    for(int i = -1; i <=1; i++){
+        for(int j = -1; j<=1; j++){
+            for(int k = -1; k <=1; k++){
+
+                vec3 cellOffset = vec3(i,j,k);
+                vec3 pointPosition = cellOffset + hash33(cellPos + cellOffset);
+
+                float dist = ChevishevDist(localPos - pointPosition);
+
+                if(dist < d1){
+                    d2 = d1;
+                    d1 = dist;
+                    idx = cellPos + cellOffset; 
+                }
+                else if(dist < d2){
+                    d2 = dist;
+                }
+
+            }
+        }
+    }
+}
+
+void ManhattanVoronoi2D(vec2 p,inout float d1,inout float d2,inout vec2 idx){
+    vec2 cellPos = floor(p);
+    vec2 localPos = p - cellPos; 
+    d1 = 100.0;
+
+    for(int i = -1; i <=1; i++){
+        for(int j = -1; j<=1; j++){
+            vec2 cellOffset = vec2(i,j);
+            vec2 pointPosition = cellOffset + hash22(cellPos + cellOffset);
+
+            float dist = Manhattan2D(localPos - pointPosition);
+
+            if(dist < d1){
+                d2 = d1;
+                d1 = dist;
+                idx = cellPos + cellOffset; 
+            }
+            else if(dist < d2){
+                d2 = dist;
+            }
+
+        }
+    }
+}
+
+
+
+
 

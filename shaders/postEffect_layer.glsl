@@ -12,12 +12,41 @@
 out vec4 Out_color;
 
 uniform sampler2D bloom_combine;
-
+#define Crash buttons[20]
 
 void main() {
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
     vec2 texuv = gl_FragCoord.xy / resolution.xy;
     
+    float glass_factor = 1.0;
+    int id = 0;
+    if(ToggleB(Crash.w)){
+        float d = 1000.0;
+        float d2 = 999.0;
+        for(int i = 0; i < 16; i++){
+            float theta = TAU * float(i) / 8.0;
+            float radius = 0.1;
+            vec2 p_pos = vec2(cos(theta),sin(theta)) * radius + hash21(i + b_beat.w * 16) * 0.02 + (hash21(b_beat.w) * 2.0 - 1.0 )* 0.4;
+            vec2 glass_uv = uv + fract(simplexNoise(uv * 10.0) * 10.0) * 0.004;
+            float dist = length(glass_uv - p_pos);
+
+            if(d > dist){
+                d2 = d;
+                d = dist;
+                id = i;
+            }
+            else if(d2 > dist){
+                d2 = dist;
+            }
+        }
+
+        texuv += (hash21(id) * 2.0 - 1.0) * 0.1;
+        uv += (hash21(id) * 2.0 - 1.0) * 0.1;
+        texuv = mod(texuv,1.0);
+
+        glass_factor = d2 - d;
+    }
+
     float percent = NoiseSlider;
     float noiseOn = float(percent < hash11(uv.y * time)); 
 
@@ -27,8 +56,21 @@ void main() {
     float _sinNoiseScale = hash11(time *3.0) - 0.5;
     _sinNoiseScale  = (NoiseSlider < 0.5) ? 0.5 - NoiseSlider : 0.0;
 
-    texuv.x += sin(uv.y * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
-    texuv.x += (hash11(floor(uv.y * 300.0) + time) - 0.5) * _noiseX ;
+    // texuv.x += sin(uv.y * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
+
+    if(ToggleB(Crash)){
+        if(hash11(float(id)) < 0.5){
+            texuv.x += (hash11(floor(uv.y * 300.0) + time) - 0.5) * _noiseX ;
+            texuv.x += sin(uv.y * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
+        }else{
+            texuv.y += (hash11(floor(uv.x * 300.0) + time) - 0.5) * _noiseX ;
+            texuv.y += sin(uv.x * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
+        }
+    }
+    else{
+        texuv.x += sin(uv.y * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
+        texuv.x += (hash11(floor(uv.y * 300.0) + time) - 0.5) * _noiseX ;
+    }
 
     vec2 Roffset = vec2(-0.01,0.0) * AbsorbSlider;
     vec2 Goffset = vec2(0.0,0.0) * AbsorbSlider;
@@ -53,33 +95,40 @@ void main() {
         vec3 maxCol = vec3(0);
         int idx = 0;
         int Radius = 100;
+        vec3 texCol; 
         for(int i = 0; i < Radius; i++){
-            int dir_id = int(sliders[13] * 3.0);
+            int dir_id = int(clamp(hash11(b_beat.w) * 5.0 + 2.0, .0,5.0)); //Out-of-Array Dengerous
+
             ivec2 dir[4] = {ivec2(0,i),ivec2(i,0),ivec2(0,-i),ivec2(-i,0)};
             ivec2 neighborCoordinate = ivec2(gl_FragCoord.xy) + dir[dir_id];
             vec2 tuv = vec2(neighborCoordinate) / resolution.xy;
-            vec3 texCol = texture(bloom_combine,tuv).xyz;
+            texCol = texture(bloom_combine,tuv).xyz;
             if(length(maxCol) < length(texCol)){
                 maxCol = texCol;
                 idx = i;
             }
         }
-        col = maxCol * (Radius - idx) / Radius;
+        col = texCol * maxCol * (Radius - idx) / Radius;
+    }
+
+    if(ToggleB(Crash.w)){
+        float u = uv.y;
+        vec2 glass_uv = uv.yy;
+        if(hash11(float(id) * 8.0 + b_beat.w) > 0.5){ 
+            u = uv.x;
+            glass_uv = uv.xx;
+        }
+
+        // u += hash11(floor(time * 20.0) + u * 100.0) * 100.0;  
+        u = floor((u + hash11(id)) * 700.00);
+    
+        if(hash11(u) > 0.99 * NoiseSlider) col = texture(bloom_combine,mod(glass_uv,1.0)).xyz * hash31(u); 
     }
 
 
+    col = mix(col,col - 0.2,vec3(step(glass_factor,0.0005)));
 
-    // float d1,d2;
-    // vec3 idx;
-    // ChevishevVoronoi3D(vec3(uv * 10.0,0),d1,d2,idx);
-
-    // col = vec3(d1);
-
-    // float d1,d2;
-    // vec2 idx;
-    // ManhattanVoronoi2D(vec2(uv * 5.0),d1,d2,idx);
-    // col = hash32(idx); 
-
-
+    //Matrix
+    // col = pow(col,vec3(1.1,0.9,1.1));
     Out_color = vec4(col,1.0);
 }

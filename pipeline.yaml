@@ -40,6 +40,12 @@ stages:
 
   - fs: "./shaders/postEffect_layer.glsl"
 
+ndi:
+  - source: "0youtube-spout"
+    name: "NDI_0"
+  - source: "1youtube-spout"
+    name: "NDI_1"
+
 images:
    - path: "./img/Plot.png"
      name: "PlotLogo"

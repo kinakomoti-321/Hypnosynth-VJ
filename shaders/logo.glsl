@@ -9,6 +9,7 @@ out vec4 color;
 #pragma include "./shaders/common/sdf.glsl"
 #pragma include "./shaders/common/easing.glsl"
 #pragma include "./shaders/common/benri.glsl"
+#pragma include "./shaders/common/font.glsl"
 
 uniform sampler2D PlotLogo;
 
@@ -16,6 +17,10 @@ uniform sampler2D PlotLogo;
 #define Beat time * BPM / 60
 
 uniform sampler2D VAT_test;
+
+#define Log_Button buttons[4]
+#define Logo_CaosSlider sliders[4]
+
 
 vec3 getNormal(vec2 uv,float offset,int octaves){
     vec2 eps = vec2(0.001,0.0);
@@ -41,54 +46,89 @@ void main() {
     vec3 col = vec3(0);
     vec3 back_ground = vec3(0.0);
 
+    int logo_index = int(LogoSlider * 5.0f);
+
     //------------
     //Front
     //------------
     float beatTime = floor(time * 10.0 + 1.0);
     float beatTimef = fract(time * 10.0 + 1.0);
     vec2 logouv = tuv * 2.0 - 1.0;
+    logouv *= hash11(b_beat.w) * 1.0 + 0.25;
     logouv *= 2.0;
     logouv += ((hash21(beatTime) * 2.0 - 1.0) * sliders[0]) * (beatTimef * 0.2 + 0.8);
     logouv = logouv * 0.5 + 0.5 ;
     //なんかいい感じ
-    vec4 plogo = texture(PlotLogo,logouv+ offsetCurl((uv) * 5.0,0.5 * Toggle(buttons[1].w)));
 
-    //------------
-    //Back
-    //------------
-    float split_n = RangeHash11(b_beat.w,1.0,10.0);
-    vec2 noiseUV = kaleido_pmod(uv, int(split_n) * 2) * 1.0;
-    // noiseUV = uv * 10.0;
-    vec3 normal = getNormal(noiseUV,time * 0.1,int(RangeHash11(b_beat.w,6.0,8.0)));
-    // vec3 lightDir = normalize(easeHash31(b_beat.w,b_beat.y,1000.0) * vec3(2.0,1.0,2.0) - vec3(1.0,0.0,1.0));
-    vec3 lightDir = normalize(vec3(0,1,0));
-    vec3 viewDir = normalize(vec3(-1,uv));
-    vec3 halfDir = normalize(lightDir + viewDir);
-    back_ground = saturate(vec3(pow(dot(halfDir,normal),10.0)));
-
-    //-----
-    //Mask
-    //-----
-    vec3 back_mask = vec3(0.0);
-    vec2 mask_uv = uv;
-    float sdf_mask = sdBox(uv,vec2(0.1,0.4));
-
-    int counter = (int(b_beat.w)  % 3);
-    float[3] weight = float[](-1.0,0.0,1.0);
-    mask_uv.y *= -1.0 * weight[counter];
-    mask_uv.x = repeat(mask_uv.x,1);
-    sdf_mask = sdEquilateralTriangle(mask_uv,0.3);
-
-    // mask_uv.x = repeat(mask_uv.x,0.7);
-    // sdf_mask = sdEquilateralTriangle(mask_uv,0.3);
-
-    if(sdf_mask < 0.0){
-        back_mask = vec3(1.0);
+    vec4 plogo;
+    if(logo_index == 0){
+        plogo = texture(PlotLogo,logouv);
+    }
+    else if(logo_index == 1){
+       plogo = texture(PlotLogo,logouv+ offsetCurl((uv) * 5.0,0.5 ));
     }
 
-    back_ground *= back_mask * sliders[1];
+    vec2 uv_text = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
 
-    col = mix(back_ground,vec3(1.0),plogo.w);
+    int text_index = int(mod(b_beat.w,4.0));
+
+    if(text_index == 1){
+        uv_text.x = abs(uv_text.x) - 1.0;
+    }
+    else if(text_index == 2){
+        uv_text -= 1.0;
+        uv_text += hash22(floor(uv_text * 10.0));
+    }
+    else if(text_index == 3){
+        if(gl_FragCoord.x / resolution.x > 0.5)
+        {
+            uv_text.x = 1.0 - abs(uv_text.x) - 1.0;
+            uv_text.y = -uv_text.y;
+        }
+    }
+    else if(text_index == 4){
+        uv_text -= 1.0;
+        uv_text += hash22(floor(uv_text * 10.0));
+    }
+
+
+    uv_text += 1.0;
+    vec2 uv1 = (uv_text) * 40.0;
+    
+    float log_time = time * 10.0;
+    uv1.y -= floor(log_time) * 1.2;
+
+    ivec2 index = ivec2(uv1 / vec2(0.8,1.2));
+    uv1.x = mod(uv1.x,0.8);
+    uv1.y = mod(uv1.y,1.2);
+    
+    int isLine = 10 - int(floor(log_time));
+    bool line_mask = (float(LineMaxLength) * fract(log_time) > float(index.x)) ? true : false;
+
+    vec2 rnd_index = vec2(hash11(float(index.y)),hash12(vec2(index)));
+    int max_char = int(rnd_index.x * float(LineMaxLength));
+
+    int char_index = int(rnd_index.y * 94.0);
+    //int char_index = int(rnd_index.y * 100.0); //Bug
+
+
+    char_index = (index.x < max_char) ? char_index : 0;
+
+    col = vec3(font(uv1,char_index)); 
+
+    if(isLine == index.y) 
+    {
+        col *= float(line_mask);
+    }
+    else{
+        col *= float(index.x < LineMaxLength);
+        col *= float(index.y > isLine);
+    }
+
+    if(ToggleB(Log_Button.w)){col = vec3(0.0);}
+
+    // col *= vec3(0.0,0.7,0.0);
+    col = mix(col,vec3(1.0),plogo.w);
 
     color = vec4(col,1.0);
 }

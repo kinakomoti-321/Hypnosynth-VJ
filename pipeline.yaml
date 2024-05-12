@@ -7,10 +7,6 @@ stages:
     
   - fs: "./shaders/scene1.glsl"
     target: "scene1"
-
-  
-  # - fs: "./shaders/CellerAutomaton.glsl"
-  #   target: "celler"
   
   - fs: "./shaders/raytracing.glsl"
     target: "raytracing"

@@ -27,7 +27,7 @@ void main() {
     float sigma = 20.0;
    vec3 bloom_light = gaussian_blur(bloom_gauss,texuv,uv_offset,sigma) * 0.5;
 
-    col += bloom_light * 2.0;
+    // col += bloom_light * 2.0;
 
     Out_color = vec4(col,1.0);
 }

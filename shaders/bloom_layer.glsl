@@ -19,7 +19,7 @@ void main() {
     vec2 tuv = (gl_FragCoord.xy) / resolution.xy;
 
     vec4 color = texture(combine_layer,tuv);
-    float threashold = sliders[10];
+    float threashold = 0.0;
     if(GetRadicance(color.xyz) < threashold){
         color = vec4(0.0);
     }

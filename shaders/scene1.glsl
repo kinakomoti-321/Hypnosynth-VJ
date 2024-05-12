@@ -17,10 +17,6 @@ uniform sampler2D PlotLogo;
 
 uniform sampler2D VAT_test;
 
-#define LogoSlider sliders[2]
-#define LogoButton1 buttons[4]
-
-
 vec3 getNormal(vec2 uv,float offset,int octaves){
     vec2 eps = vec2(0.001,0.0);
     int dammy = 0;

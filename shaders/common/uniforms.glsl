@@ -17,9 +17,8 @@ uniform vec4 buttons[32];
 // #define Raytracing_Button buttons[]
 
 //TV_Layer
-#define NoiseSlider sliders[14]
+#define NoiseSlider sliders[13]
 
-//TV Filter
 #define PixelFluid_Button buttons[18]
 #define GlassFilter_Button buttons[19]
 #define MFButton buttons[20]
@@ -27,5 +26,6 @@ uniform vec4 buttons[32];
 //PostProcess
 #define AbsorbSlider sliders[15]
 #define Laplacian_Button buttons[21]
-#define FakePixelFilter_Button buttons[22]
+#define ParupunteFilter_Button button[22] //Dengerous
+#define FakePixelFilter_Button buttons[23]
 //#define ParupunteFilter_Button button[23] //Dengerous

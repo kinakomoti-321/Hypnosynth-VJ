@@ -32,7 +32,6 @@ void main() {
 
     //MagneticFilter----------------------------------------
     if(ToggleB(MFButton.w)){
-
         vec2 shoot_uv = MagneticFilter(uv); 
         texuv = mod(shoot_uv,1.0);
     }

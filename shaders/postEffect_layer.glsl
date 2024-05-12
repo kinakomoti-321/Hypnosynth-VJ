@@ -90,7 +90,7 @@ void main() {
     }
 
 
-    if(ToggleB(buttons[19].w)){
+    if(ToggleB(FakePixelFilter_Button.w)){
         vec2 dxy = 1.0 / resolution.xy; 
         vec3 maxCol = vec3(0);
         int idx = 0;

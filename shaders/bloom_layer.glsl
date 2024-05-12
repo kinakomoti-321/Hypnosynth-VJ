@@ -10,7 +10,7 @@
 #pragma include "./shaders/common/benri.glsl"
 
 
-uniform sampler2D combine_layer;
+uniform sampler2D pixelflow_layer;
 
 out vec4 Out_color;
 
@@ -18,7 +18,7 @@ void main() {
     vec2 uv = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
     vec2 tuv = (gl_FragCoord.xy) / resolution.xy;
 
-    vec4 color = texture(combine_layer,tuv);
+    vec4 color = texture(pixelflow_layer,tuv);
     float threashold = 0.0;
     if(GetRadicance(color.xyz) < threashold){
         color = vec4(0.0);

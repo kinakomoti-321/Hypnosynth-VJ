@@ -1,29 +1,32 @@
 stages:
-  - vs: "./shaders/vertex.glsl"
+  - vs: "./shaders/1_vertex.glsl"
     mode: "LINE_STRIP"
     line_width: 2
     count: 1000
     target: "vertex"
     
-  - fs: "./shaders/scene1.glsl"
+  - fs: "./shaders/2_scene1.glsl"
     target: "scene1"
   
-  - fs: "./shaders/raytracing.glsl"
+  - fs: "./shaders/3_logo.glsl"
+    target: "logo_layer"
+
+  - fs: "./shaders/4_raytracing.glsl"
     target: "raytracing"
     float: true
 
-  - fs: "./shaders/logo.glsl"
-    target: "logo_layer"
-
-  - fs: "./shaders/accumulate_layer.glsl"
+  - fs: "./shaders/5_accumulate_layer.glsl"
     target: "accumulate_layer"
     float: true
 
-  - fs: "./shaders/tv.glsl"
+  - fs: "./shaders/6_combine_layer.glsl"
+    target: "combine_layer"
+  
+  - fs: "./shaders/7_tv.glsl"
     target: "tv_layer"
 
-  - fs: "./shaders/combine_layer.glsl"
-    target: "combine_layer"
+  - fs: "./shaders/8_pixelflow.glsl"
+    target: "pixelflow_layer"
 
   - fs: "./shaders/bloom_layer.glsl"
     target: "bloom_layer"
@@ -43,7 +46,7 @@ ndi:
     name: "NDI_1"
 
 images:
-   - path: "./img/Plot.png"
+   - path: "./img/hypnosynth_logo_white.png"
      name: "PlotLogo"
    - path: "./img/VAT_Umishida.png"
      name: "VAT_test"

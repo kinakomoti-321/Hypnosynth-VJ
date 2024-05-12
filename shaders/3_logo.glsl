@@ -51,26 +51,32 @@ void main() {
     //------------
     //Front
     //------------
+    float time_counter = floor(time * 2.0);
+
     float beatTime = floor(time * 10.0 + 1.0);
     float beatTimef = fract(time * 10.0 + 1.0);
     vec2 logouv = tuv * 2.0 - 1.0;
-    logouv *= hash11(b_beat.w) * 1.0 + 0.25;
+    logouv *= mix(1.0,hash11(time_counter) * 1.0 + 0.45,sliders[3] + 0.1);
     logouv *= 2.0;
-    logouv += ((hash21(beatTime) * 2.0 - 1.0) * sliders[0]) * (beatTimef * 0.2 + 0.8);
+    logouv += ((hash21(beatTime) * 2.0 - 1.0) * sliders[3]) * (beatTimef * 0.2 + 0.8);
     logouv = logouv * 0.5 + 0.5 ;
     //なんかいい感じ
 
     vec4 plogo;
+    logouv.y /= 0.7;
     if(logo_index == 0){
         plogo = texture(PlotLogo,logouv);
     }
     else if(logo_index == 1){
-       plogo = texture(PlotLogo,logouv+ offsetCurl((uv) * 5.0,0.5 ));
+        logouv+= offsetCurl((uv) * 5.0,0.5 );
+        plogo = texture(PlotLogo,logouv);
     }
+
+    if(logouv.x < 0.0 || logouv.x >= 0.999) plogo = vec4(0.0);
 
     vec2 uv_text = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
 
-    int text_index = int(mod(b_beat.w,4.0));
+    int text_index = int(mod(time_counter,4.0));
 
     if(text_index == 1){
         uv_text.x = abs(uv_text.x) - 1.0;
@@ -114,7 +120,7 @@ void main() {
 
     char_index = (index.x < max_char) ? char_index : 0;
 
-    col = vec3(font(uv1,char_index)); 
+    col = vec3(font(uv1,char_index)) * 0.8; 
 
     if(isLine == index.y) 
     {

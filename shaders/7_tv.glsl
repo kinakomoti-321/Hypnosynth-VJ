@@ -17,10 +17,11 @@ uniform sampler2D scene1;
 uniform sampler2D logo_layer;
 uniform sampler2D vertex;
 uniform sampler2D tv_layer;
+uniform sampler2D combine_layer;
+
 
 uint seed;
 
-#define MFButton buttons[]
 uint PCGHash()
 {
     seed = seed * 747796405u + 2891336453u;
@@ -43,17 +44,7 @@ vec3 Movie(vec2 texuv){
     vec3 col;
     vec2 uv = texuv * 2.0 - 1.0;
 
-    //GlassFilter-------------------------------------------
-
-    //GlassFilter-------------------------------------------
-    
-    //MagneticFilter----------------------------------------
-    vec2 shoot_uv = MagneticFilter(uv); 
-    texuv = mod(shoot_uv,1.0);
-    //MagneticFilter----------------------------------------
-    
-    //Logo Layer----------------------
-    vec4 logo_col = texture(logo_layer,texuv);
+    vec4 logo_col = texture(combine_layer,texuv);
     col = logo_col.xyz; 
     return col;
 }
@@ -62,6 +53,7 @@ struct SDFInfo{
     int index;
     vec2 uv;
 };
+
 float map(vec3 p,inout SDFInfo info){
     float d = 10000.0;
 
@@ -116,7 +108,7 @@ void main() {
     // vec3 prePos = hash31(b_beat.w - 1.0) * 10.0; 
     // vec3 nowPos = hash31(b_beat.w) * 10.0;
     // vec3 ro = mix(prePos,nowPos, vec3(clamp(powEase(b_beat.y,20.0),0.0,1.0)));
-    vec3 ro = vec3(1.6,0.0,0.0);
+    vec3 ro = vec3(1.55,0.0,0.0);
     //vec3 ro = vec3(0,0,-10);
     vec3 atlook = vec3(0.0);
     

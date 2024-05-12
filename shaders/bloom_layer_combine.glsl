@@ -9,7 +9,7 @@
 #pragma include "./shaders/common/benri.glsl"
 #pragma include "./shaders/common/filter.glsl"
 
-uniform sampler2D combine_layer;
+uniform sampler2D pixelflow_layer;
 // uniform sampler2D bloom_layer;
 uniform sampler2D bloom_gauss;
 
@@ -20,7 +20,7 @@ uniform vec3 tint;
 void main() {
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
     vec2 texuv = gl_FragCoord.xy / resolution.xy;
-    vec3 col = texture(combine_layer, texuv).xyz;
+    vec3 col = texture(pixelflow_layer, texuv).xyz;
 
     vec2 uv_offset = 1.0 / resolution.xy;
     uv_offset.x = 0;

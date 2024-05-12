@@ -20,10 +20,12 @@ uniform vec4 buttons[32];
 #define NoiseSlider sliders[14]
 
 //TV Filter
+#define PixelFluid_Button buttons[18]
+#define GlassFilter_Button buttons[19]
+#define MFButton buttons[20]
 
 //PostProcess
 #define AbsorbSlider sliders[15]
 #define Laplacian_Button buttons[21]
 #define FakePixelFilter_Button buttons[22]
 //#define ParupunteFilter_Button button[23] //Dengerous
-#define PixelFluid_Button buttons[23]

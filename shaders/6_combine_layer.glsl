@@ -39,7 +39,20 @@ void main() {
 
     vec4 color = texture(vertex,texuv);
     
-    color = texture(logo_layer,texuv);
+    if(ToggleB(SceneButton.w)){
+        color = texture(scene1,texuv);
+    }
+
+    if(ToggleB(Raytracing_Button.w)){
+        color = texture(accumulate_layer,texuv);
+        color /= color.a;
+    }
+
+    if(ToggleB(LogoButton.w)){
+        vec4 color_logo = texture(logo_layer,texuv);
+        color = mix(color,color_logo,vec4(color_logo.a));
+    }
+
 
     vec2 dxy = 1.0/resolution.xy;
     //Pixel Fluid 

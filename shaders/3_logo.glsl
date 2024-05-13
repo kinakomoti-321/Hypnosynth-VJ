@@ -136,5 +136,6 @@ void main() {
     // col *= vec3(0.0,0.7,0.0);
     col = mix(col,vec3(1.0),plogo.w);
 
-    color = vec4(col,1.0);
+    float alpha = (col.x > 0.0) ? 1.0 : 0.0;
+    color = vec4(col,alpha);
 }

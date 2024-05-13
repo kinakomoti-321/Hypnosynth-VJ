@@ -12,12 +12,15 @@ uniform vec4 buttons[32];
 
 //Logo Layer
 #define LogoSlider sliders[2]
-#define LogoButton1 buttons[4]
+#define LogoButton buttons[3]
 
 // #define Raytracing_Button buttons[]
 
 //TV_Layer
 #define NoiseSlider sliders[13]
+
+//Scene1
+#define SceneButton buttons[6]
 
 #define PixelFluid_Button buttons[18]
 #define GlassFilter_Button buttons[19]

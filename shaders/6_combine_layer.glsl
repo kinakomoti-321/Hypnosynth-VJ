@@ -46,13 +46,12 @@ void main() {
     if(ToggleB(Raytracing_Button.w)){
         color = texture(accumulate_layer,texuv);
         color /= color.a;
+        color *=1.5;
     }
-
     if(ToggleB(LogoButton.w)){
         vec4 color_logo = texture(logo_layer,texuv);
         color = mix(color,color_logo,vec4(color_logo.a));
     }
-
 
     vec2 dxy = 1.0/resolution.xy;
     //Pixel Fluid 
@@ -66,6 +65,7 @@ void main() {
         texuv = gl_FragCoord.xy / resolution.xy;
         color = texture(combine_layer,mod(texuv + vec2(velo_int * dxy),1.0));
     }
+
 
 
     Out_color = color;

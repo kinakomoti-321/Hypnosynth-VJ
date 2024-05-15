@@ -24,6 +24,26 @@ float sdPlane( vec3 p, vec3 n, float h )
 }
 
 
+
+float dMenger(vec3 z0,vec3 beta,vec3 offset, float scale){
+    vec4 z = vec4(z0,1.0);
+    z.xyz = mod(z.xyz,beta.y) - beta.y/2.0 ;
+    z.xy = pmod(z.xy,beta.z);
+    for(int n = 0; n < 4; n ++){
+        z = abs(z);
+
+        if(z.x < z.y) z.xy = z.yx;
+        if(z.x < z.z) z.xz = z.zx;
+        if(z.y < z.z) z.yz = z.zy;
+
+        z *= scale;
+        z.xyz -= offset * (scale - 1.0);
+        if(z.z < -0.5 * offset.z * (scale - 1.0)) z.z += offset.z * (scale -1.0);
+    }
+    return (length(max(abs(z.xyz)-vec3(1.0,1.0,1.0),0.0)) - 0.05) / z.w;
+}
+
+
 //2D SDF
 //https://iquilezles.org/articles/distfunctions2d/
 float sdBox( in vec2 p, in vec2 b )

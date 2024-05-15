@@ -18,6 +18,19 @@ vec2 rotate(vec2 v, float a) {
 }
 
 
+vec2 pmod(vec2 p, float r)
+{
+    float a = atan(p.x, p.y) + PI / r;
+    // "+ pi / r" means shortcut of "+ ((pi2 / r) * 0.5)".
+    // so we want to get half angles of circle splitted by r.
+
+    float n = TAU / r;
+    a = floor(a / n) * n;
+    // floor(a / n) means calculating ID.
+
+    return p * rot(-a);
+}
+
 //https://iquilezles.org/articles/smin/
 vec2 smoothMin(float a, float b, float k){
     float h = 1.0 - min( abs(a-b)/(6.0*k), 1.0 );

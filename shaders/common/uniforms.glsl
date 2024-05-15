@@ -7,7 +7,6 @@ uniform float sliders[32];
 uniform vec4 buttons[32];
 
 #define b_beat buttons[0]
-#define Raytracing_Button buttons[9]
 #define Vertex_Button buttons[3]
 
 //Logo Layer
@@ -16,7 +15,19 @@ uniform vec4 buttons[32];
 
 // #define Raytracing_Button buttons[]
 
+#define Raytracing_Button buttons[9]
+#define Raytracing_IndexOffset buttons[10]
+#define Raytracing_SceneCheck button[11]
+
+#define Raytracing_Tekitou sliders[6]
+#define Raytracing_Slider sliders[7]
+
 //TV_Layer
+#define TV_StartButton buttons[16]
+#define TV_SceneChange buttons[17]
+
+#define TV_FOVSlider sliders[10]
+
 #define NoiseSlider sliders[13]
 
 //Scene1

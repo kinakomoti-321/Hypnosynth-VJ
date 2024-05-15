@@ -16,7 +16,8 @@ uniform sampler2D raytracing;
 
 uint seed;
 
-int scene_number;
+int scene_number = 0;
+int caostic = 0;
 
 uint PCGHash()
 {
@@ -35,20 +36,110 @@ vec2 rnd2(){
     return vec2(rnd1(),rnd1());
 }
 
-float map(vec3 p,inout int index){
-    float d = 10000.0;
-    index = 0;
-    d = sdPlane(p,vec3(0,1,0),1.0);
-
+float ifs_box(vec3 p,float time){
+    float d = 1000.0;
     vec3 p1 = p;
-    if(bool(Toggle(b_beat.w))){
-        p1.x = mod(p1.x,5.0) - 2.5;
+    p1 -= vec3(0.0,0.0,0.0);
+    p1.xy = rotate(p1.xy,time);
+    p1.yz = rotate(p1.yz,time);
+    
+    p1 = abs(p1) - vec3(1.0,0.0,0.1);
+    p1.xy = rotate(p1.xy,time);
+    p1.yz = rotate(p1.yz,time * 2.0 + 2.1);
+
+    for(int i = 0; i < 4; i++){
+        float dt = sdBox(p1,vec3(0.2,2.0,0.5));
+        p1 = abs(p1 - vec3(100.0)) - vec3(1.0,0.0,1.0);
+        p1.xy = rotate(p1.xy,time);
+        p1.yz = rotate(p1.yz,time * 2.0 + 2.1);
+
+        d = min(dt,d);
+    } 
+    return d;
+}
+
+// 0:Normal Lambert 1:Light,
+vec3 basecolor[10] = vec3[](vec3(0.8),vec3(0.8),vec3(0.8,0.2,0.2),
+vec3(0.2,0.8,0.2),vec3(1.0),vec3(0.8),
+vec3(0.2,0.2,0.8),vec3(1.0),vec3(0.8,0.8,0.0),vec3(1.0));
+
+vec3 emission[10] = vec3[](vec3(0.0),vec3(3.0),vec3(0.0),
+vec3(0.0),vec3(0.0),vec3(0.8,0.8,1.0),
+vec3(0.0),vec3(0.0),vec3(0.0),vec3(1.0,0.2,0.2));
+
+float roughness[10] = float[](0.0,0.0,0.01,0.0,0.03,0.0,0.05,0.0,0.2,0.0);
+float metallic[10] = float[](0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0);
+
+
+float map_cornelbox(vec3 p, inout int index){
+    if(caostic >= 1){
+        p.x = repeat(p.x,2.0);
+        p.y = repeat(p.y,2.0);
     }
 
-    float d1 = sdBox(p1,vec3(1,10,1));
-    index = (d > d1) ? 1 : index;
-    d = min(d,d1);
+    float d1 = sdBox(p,vec3(1.0)); 
+    float d2 = sdBox(p - vec3(0.0,0.0,0.4),vec3(1.2,0.8,1.2)); 
+    float d3 = sdBox(p - vec3(1.0,0.0,0.0),vec3(0.1,1.0,1.0)); 
+    float d4 = sdBox(p + vec3(1.0,0.0,0.0),vec3(0.1,1.0,1.0)); 
+    float d5 = sdBox(p - vec3(0.0,0.8,0.0),vec3(0.5,0.05,0.5)); 
 
+    vec3 p_box = p;
+    p_box += vec3(0.4,0.5,0.0);
+    p_box.xz = rotate(p_box.xz,PI * 0.25);
+    float d6 = sdBox(p_box,vec3(0.2,0.3,0.2) * 1.4);
+    vec3 p_box2 = p;
+    p_box2 += vec3(-0.3,0.6,-0.3);
+    p_box2.xz = rotate(p_box2.xz,PI * 0.25);
+    float d7 = sdBox(p_box2,vec3(0.2) * 1.2);
+    float d;
+
+    d = opSubtraction(d2,d1);
+    index = 0;
+
+    index = (d > d3) ? 2 : index;
+    d = opUnion(d,d3);
+    index = (d > d4) ? 3 : index;
+    d = opUnion(d,d4);
+    index = (d > d5) ? 1 : index;
+    d = opUnion(d,d5); 
+    
+    d6 = opUnion(d7,d6);
+    index = (d > d6) ? 0 : index;
+    d = opUnion(d,d6);
+    return d; 
+}
+
+float scene2_map(vec3 p, inout int index){
+    vec3 p1 = p;
+    float d1 = sdBox(p1,vec3(20.0,10.0,20.0)); 
+    float d2 = sdBox(p1,vec3(19.0,9.0,19.0)); 
+
+    vec3 p2 = p;
+    p2.xy = repeat(p2.xy,5.0);
+    float d3 = sdBox(p2,vec3(1.0)); 
+
+    float d = opSubtraction(d2,d1);
+    index = (d3 < d) ? 1:0;
+    d = opUnion(d,d3);
+    return d;
+}
+
+float map(vec3 p,inout int index){
+    float d = 10000.0;
+    vec3 p1 = p;
+    int index1 = 1;
+
+    if(caostic >= 2){
+        p.yz = rotate(p.yz,p.x * (floor(hash11(b_beat.w + 1.0) * float(caostic - 1.0)) * 0.1) + b_beat.w);
+        p.xz = rotate(p.xz,p.y * (floor(hash11(b_beat.w) * float(caostic - 1.0)) * 0.3) + b_beat.w);
+    }
+
+    if(scene_number == 0){
+        d = map_cornelbox(p,index);
+    }
+    else{
+        d = scene2_map(p,index);
+    }
     return d;
 }
 
@@ -70,6 +161,7 @@ struct IntersectInfo{
     bool is_hit;
     vec3 emission;
     vec3 basecol;
+    float metallic;
     vec2 roughness;
 };
 
@@ -85,20 +177,24 @@ bool raymarching(vec3 ro,vec3 rd,inout IntersectInfo info){
         float d = map(pos,index);
 
         if(d < 0.0001){
+            if(ToggleB(Raytracing_IndexOffset.w)){
+                index = int(mod(b_beat.w + (index),4));
+            }
             info.pos = pos;
             info.normal = getnormal(pos);
             info.dist = total_d;
-            if(index == 0){
-                info.basecol = vec3(0.8);
-                info.roughness = vec2(0.2);
-                info.emission = vec3(0.0);
-            }
-            else if(index == 1){
-                info.basecol = vec3(0.8);
-                info.roughness = vec2(0.2);
-                info.emission = vec3(1.0);
-            }
+            info.basecol = basecolor[index];
+            info.roughness = vec2(roughness[index]);
+            info.metallic = metallic[index];
+            info.emission = emission[index];
 
+            if(ToggleB(Raytracing_IndexOffset.w)){
+                info.basecol = vec3(1.0);
+                info.roughness = vec2(1.0);
+                info.metallic = 1.0;
+                // info.roughness = vec2(cyclicNoise(info.pos *2.0,5));
+                info.roughness = vec2(0.1);
+            }
             return true;
 
             break;
@@ -240,14 +336,16 @@ vec3 pathtrace(vec3 ro,vec3 rd){
 
         IntersectInfo info;
         if(!raymarching(ray_ori,ray_dir,info)){
-            //LTE = throughput;
+            if(depth != 0){
+                LTE += throughput * pow(clamp(ray_dir.y,0.0,1.0),10.0);
+            }
             break;
         }
 
-        throughput *= exp(-info.dist * 0.025);
+        // throughput *= exp(-info.dist * 0.025);
 
         if(length(info.emission) > 0.1){
-            LTE = throughput * info.emission;
+            LTE = throughput * info.emission * (dot(info.normal,-ray_dir)*0.5 + 0.5);
             break;
         }
 
@@ -262,10 +360,10 @@ vec3 pathtrace(vec3 ro,vec3 rd){
         vec3 local_wi;
 
         vec3 bsdf;
-        if(scene_number == 0){
+        if(info.metallic < 0.5){
             bsdf = LambertBRDF(local_wo,local_wi,info.basecol);
         }
-        if(scene_number == 1){
+        else{
             bsdf = MicrofacetBRDF(local_wo,local_wi,info.basecol,info.roughness.x,info.roughness.y);
         }
 
@@ -285,19 +383,28 @@ void main(){
     vec2 uv = ((gl_FragCoord.xy + rnd2()) - resolution.xy * 0.5) / resolution.y;
     //vec2 uv = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
     vec2 tuv = (gl_FragCoord.xy) / resolution.xy;
+    
+    caostic = int(Raytracing_Slider * 4);
 
     scene_number = 0;
     vec2 rotuv = uv * rot(hash11(b_beat.w) * TAU);
-    if(rotuv.x > 0.0){
-        scene_number = 1;
-    }
+    // if(rotuv.x > 0.0){
+    //     scene_number = 1;
+    // }
 
-    vec3 prePos = hash31(b_beat.w - 1.0) * 10.0; 
-    vec3 nowPos = hash31(b_beat.w) * 10.0;
+    vec3 prePos = hash31(b_beat.w - 1.0); 
+    vec3 nowPos = hash31(b_beat.w);
+
     vec3 ro = mix(prePos,nowPos, vec3(clamp(powEase(b_beat.y,20.0),0.0,1.0)));
+    ro = (ro * 2.0) - 1.0;
+    float range = 2.0;
+    if(caostic > 0) range = 10.0;
+    ro *= range;
+    ro.z = abs(ro.z) + range;
+    // ro = vec3(0,0,6);
     vec3 atlook = vec3(0.0);
 
-    vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w),0.001,rnd2());
+    vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w),0.000,rnd2());
 
     vec3 col = vec3(0.0);
     
@@ -312,7 +419,7 @@ void main(){
     //     finish_col = vec4(col,1.0) + accmu_tex;
     // }
 
-    finish_col = (abs(rotuv.x) < 0.002) ? vec4(0.0)  : finish_col;
+    // finish_col = (abs(rotuv.x) < 0.002) ? vec4(0.0)  : finish_col;
 
     color = finish_col;
 }

@@ -136,8 +136,7 @@ struct SDFInfo{
     vec2 uv;
 };
 
-float map(vec3 p,inout SDFInfo info){
-    float d = 10000.0;
+float tv_map(vec3 p,inout SDFInfo info){
 
     vec3 tv_d = p;
     // tv_d.yz = repeat(tv_d.yz,2.0);
@@ -146,7 +145,7 @@ float map(vec3 p,inout SDFInfo info){
     float d3 = sdBox(tv_d-vec3(0.2,0.0,0.0),vec3(0.85));
 
     // d = d1;
-    d = opSubtraction(d2,d1);
+    float d = opSubtraction(d2,d1);
     d -= 0.05;
     info.index = 0;
     info.index = (d > d3) ? 1 : info.index;
@@ -167,6 +166,39 @@ float map(vec3 p,inout SDFInfo info){
     return d;
 }
 
+float map(vec3 p,inout SDFInfo info){
+    // vec3 tv_d = p;
+    // // tv_d.yz = repeat(tv_d.yz,2.0);
+    // float d1 = sdBox(tv_d,vec3(1.0));
+    // float d2 = sdBox(tv_d-vec3(1,0.0,0.0),vec3(0.85));
+    // float d3 = sdBox(tv_d-vec3(0.2,0.0,0.0),vec3(0.85));
+
+    // // d = d1;
+    // d = opSubtraction(d2,d1);
+    // d -= 0.05;
+    // info.index = 0;
+    // info.index = (d > d3) ? 1 : info.index;
+    // d = opUnion(d3,d);
+
+    // info.uv = vec2(1.0);
+
+    // vec2 tv_uv = p.zy * 1.3;
+    // tv_uv.y /= 0.7;
+
+    // float distort_r = length(tv_uv);
+    // tv_uv *= 1.0 + distort_r * distort_r * 0.02;
+
+    // tv_uv.x = -tv_uv.x;
+    // tv_uv = (tv_uv + 1.0) * 0.5;
+    // info.uv = tv_uv;
+
+    p.yz -= 1.05;
+    p.yz = repeat(p.yz,2.1);
+    float d = tv_map(p,info);
+
+    return d;
+}
+
 vec3 getnormal(vec3 p){
     vec2 eps = vec2(0.001,0.0);
     SDFInfo dammy;
@@ -179,6 +211,12 @@ vec3 getnormal(vec3 p){
 } 
 
 
+vec3 tebureOffset(vec2 pos,float stime){
+    float x = cyclicNoise(vec3(pos,stime),2) * 2.0 - 1.0; 
+    float y = cyclicNoise(vec3(pos + 1.0,stime),2) * 2.0 - 1.0; 
+    float z = cyclicNoise(vec3(pos + 2.0,stime),2) * 2.0 - 1.0; 
+    return vec3(x,y,z);
+}
 void main() {
     seed = uint(time * 64) * uint(gl_FragCoord.x + gl_FragCoord.y * resolution.x);
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
@@ -190,7 +228,14 @@ void main() {
     // vec3 prePos = hash31(b_beat.w - 1.0) * 10.0; 
     // vec3 nowPos = hash31(b_beat.w) * 10.0;
     // vec3 ro = mix(prePos,nowPos, vec3(clamp(powEase(b_beat.y,20.0),0.0,1.0)));
+
     vec3 ro = vec3(1.55,0.0,0.0);
+
+    if(ToggleB(TV_StartButton.w)){
+        ro = mix(vec3(1.55,0.0,0.0),vec3(2.0,0.0,0.0),TV_FOVSlider);
+        ro += tebureOffset(ro.yz,time) * 0.1 * TV_FOVSlider;
+    }
+
     //vec3 ro = vec3(0,0,-10);
     vec3 atlook = vec3(0.0);
     

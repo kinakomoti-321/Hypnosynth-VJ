@@ -23,15 +23,18 @@ uniform vec4 buttons[32];
 #define Raytracing_Slider sliders[7]
 
 //TV_Layer
-#define TV_StartButton buttons[16]
-#define TV_SceneChange buttons[17]
+#define TV_StartButton buttons[12]
+#define TV_SceneChange buttons[13]
 
-#define TV_FOVSlider sliders[10]
+#define TV_Move buttons[14];
+
+#define TV_FOVSlider sliders[8]
 
 #define NoiseSlider sliders[13]
 
 //Scene1
 #define SceneButton buttons[6]
+
 
 #define PixelFluid_Button buttons[18]
 #define GlassFilter_Button buttons[19]

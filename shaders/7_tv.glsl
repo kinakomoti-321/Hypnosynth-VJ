@@ -19,7 +19,7 @@ uniform sampler2D vertex;
 uniform sampler2D tv_layer;
 uniform sampler2D combine_layer;
 
-
+#define TVSize 2.1
 uint seed;
 
 uint PCGHash()
@@ -134,6 +134,7 @@ vec3 Movie(vec2 texuv){
 struct SDFInfo{
     int index;
     vec2 uv;
+    int TV_index;
 };
 
 float tv_map(vec3 p,inout SDFInfo info){
@@ -194,6 +195,7 @@ float map(vec3 p,inout SDFInfo info){
 
     p.yz -= 1.05;
     p.yz = repeat(p.yz,2.1);
+    
     float d = tv_map(p,info);
 
     return d;
@@ -232,13 +234,24 @@ void main() {
     vec3 ro = vec3(1.55,0.0,0.0);
 
     if(ToggleB(TV_StartButton.w)){
-        ro = mix(vec3(1.55,0.0,0.0),vec3(2.0,0.0,0.0),TV_FOVSlider);
+        ro = mix(vec3(1.55,0.0,0.0),vec3(5.0,0.0,0.0),TV_FOVSlider);
         ro += tebureOffset(ro.yz,time) * 0.1 * TV_FOVSlider;
     }
+
+    vec3 transform = vec3(0,0,TVSize * b_beat.w);
+    vec3 prePos = floor(hash31(b_beat.w - 1.0) * 3.0) * TVSize; 
+    prePos -= transform - vec3(0,0,TVSize);
+    vec3 nowPos = floor(hash31(b_beat.w) * 3.0) * TVSize;
+    nowPos -= transform;
+
+    vec3 test =  mix(prePos,nowPos, vec3(clamp(powEase(b_beat.y,10.0),0.0,1.0)));
+    vec3 offset = vec3(0.0,test.y,test.z );
 
     //vec3 ro = vec3(0,0,-10);
     vec3 atlook = vec3(0.0);
     
+    ro += offset; 
+    atlook += offset;   
     // ro.x += 1.0;
     // ro.z -= time * 100.0;
     // atlook -= time * 100.0;

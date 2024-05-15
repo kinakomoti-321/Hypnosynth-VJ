@@ -80,7 +80,7 @@ void main() {
     }
 
     back_ground *= back_mask * sliders[1];
-    
+
     col = back_ground;
 
     color = vec4(col,1.0);

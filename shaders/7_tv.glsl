@@ -40,7 +40,7 @@ vec2 rnd2(){
 }
 
 vec3 Movie(vec2 texuv){
-    texuv = mod(texuv,1.0);
+    // texuv = mod(texuv,1.0);
     vec3 col;
     vec2 uv = texuv * 2.0 - 1.0;
 
@@ -73,6 +73,9 @@ vec3 Movie(vec2 texuv){
         glass_factor = d2 - d;
     }
 
+    vec3 exception = vec3(1.0);
+    if(uv.x < -1.0||uv.x > 1.0 || uv.y < -1.0||uv.y > 1.0 ) exception = vec3(0.0);
+
     float percent = NoiseSlider;
     float noiseOn = float(percent < hash11(uv.y * time)); 
 
@@ -98,9 +101,11 @@ vec3 Movie(vec2 texuv){
         texuv.x += (hash11(floor(uv.y * 300.0) + time) - 0.5) * _noiseX ;
     }
 
-    vec2 Roffset = vec2(-0.01,0.0) * AbsorbSlider;
-    vec2 Goffset = vec2(0.0,0.0) * AbsorbSlider;
-    vec2 Boffset = vec2(0.01,0.0) * AbsorbSlider;
+
+    float absorbPower = AbsorbSlider + step(glass_factor,0.001);
+    vec2 Roffset = vec2(-0.01,0.0) *absorbPower;
+    vec2 Goffset = vec2(0.0,0.0) * absorbPower;
+    vec2 Boffset = vec2(0.01,0.0) * absorbPower;
 
     //RGB
     float r = texture(combine_layer, texuv + Roffset).x;
@@ -126,6 +131,8 @@ vec3 Movie(vec2 texuv){
 
 
     col = mix(col,col - 0.2,vec3(step(glass_factor,0.0005)));
+    // col = col * (1.0 + 0.6 * step(sin((texuv.y + hash11(texuv.x + time) * 0.01) * 2.0 + time),-0.99));
+    col *= exception;
 
     //col = logo_col.xyz; 
     return col;
@@ -142,8 +149,8 @@ float tv_map(vec3 p,inout SDFInfo info){
     vec3 tv_d = p;
     // tv_d.yz = repeat(tv_d.yz,2.0);
     float d1 = sdBox(tv_d,vec3(1.0));
-    float d2 = sdBox(tv_d-vec3(1,0.0,0.0),vec3(0.85));
-    float d3 = sdBox(tv_d-vec3(0.2,0.0,0.0),vec3(0.85));
+    float d2 = sdBox(tv_d-vec3(1,0.0,0.0),vec3(0.85,0.825,0.9));
+    float d3 = sdBox(tv_d-vec3(0.15,0.0,0.0),vec3(0.85));
 
     // d = d1;
     float d = opSubtraction(d2,d1);
@@ -154,11 +161,11 @@ float tv_map(vec3 p,inout SDFInfo info){
 
     info.uv = vec2(1.0);
 
-    vec2 tv_uv = p.zy * 1.3;
-    tv_uv.y /= 0.7;
+    vec2 tv_uv = p.zy * 1.1;
+    tv_uv.y /= 0.8;
 
     float distort_r = length(tv_uv);
-    tv_uv *= 1.0 + distort_r * distort_r * 0.02;
+    tv_uv *= 1.0 + distort_r * distort_r * 0.1;
 
     tv_uv.x = -tv_uv.x;
     tv_uv = (tv_uv + 1.0) * 0.5;
@@ -167,32 +174,8 @@ float tv_map(vec3 p,inout SDFInfo info){
     return d;
 }
 
+
 float map(vec3 p,inout SDFInfo info){
-    // vec3 tv_d = p;
-    // // tv_d.yz = repeat(tv_d.yz,2.0);
-    // float d1 = sdBox(tv_d,vec3(1.0));
-    // float d2 = sdBox(tv_d-vec3(1,0.0,0.0),vec3(0.85));
-    // float d3 = sdBox(tv_d-vec3(0.2,0.0,0.0),vec3(0.85));
-
-    // // d = d1;
-    // d = opSubtraction(d2,d1);
-    // d -= 0.05;
-    // info.index = 0;
-    // info.index = (d > d3) ? 1 : info.index;
-    // d = opUnion(d3,d);
-
-    // info.uv = vec2(1.0);
-
-    // vec2 tv_uv = p.zy * 1.3;
-    // tv_uv.y /= 0.7;
-
-    // float distort_r = length(tv_uv);
-    // tv_uv *= 1.0 + distort_r * distort_r * 0.02;
-
-    // tv_uv.x = -tv_uv.x;
-    // tv_uv = (tv_uv + 1.0) * 0.5;
-    // info.uv = tv_uv;
-
     p.yz -= 1.05;
     p.yz = repeat(p.yz,2.1);
     
@@ -231,10 +214,11 @@ void main() {
     // vec3 nowPos = hash31(b_beat.w) * 10.0;
     // vec3 ro = mix(prePos,nowPos, vec3(clamp(powEase(b_beat.y,20.0),0.0,1.0)));
 
-    vec3 ro = vec3(1.55,0.0,0.0);
+    vec3 ro = vec3(1.6,
+    0.0,0.0);
 
     if(ToggleB(TV_StartButton.w)){
-        ro = mix(vec3(1.55,0.0,0.0),vec3(5.0,0.0,0.0),TV_FOVSlider);
+        ro = mix(ro,vec3(5.0,0.0,0.0),TV_FOVSlider);
         ro += tebureOffset(ro.yz,time) * 0.1 * TV_FOVSlider;
     }
 
@@ -249,9 +233,11 @@ void main() {
 
     //vec3 ro = vec3(0,0,-10);
     vec3 atlook = vec3(0.0);
-    
-    ro += offset; 
-    atlook += offset;   
+
+    if(ToggleB(TV_MoveButton.w)){    
+        ro += offset; 
+        atlook += offset;   
+    }
     // ro.x += 1.0;
     // ro.z -= time * 100.0;
     // atlook -= time * 100.0;
@@ -268,11 +254,15 @@ void main() {
         total_d +=d;
 
         if(d < 0.001){
-            col = getnormal(pos);
+            // col = getnormal(pos);
             if(info.index == 1){
                 col = vec3(info.uv,0.0);
                 col = Movie(info.uv);
             }
+            else{
+                
+            }
+
             break;
         } 
         pos = ro + total_d * rd;

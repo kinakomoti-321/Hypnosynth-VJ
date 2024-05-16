@@ -25,8 +25,7 @@ uniform vec4 buttons[32];
 //TV_Layer
 #define TV_StartButton buttons[12]
 #define TV_SceneChange buttons[13]
-
-#define TV_Move buttons[14];
+#define TV_MoveButton buttons[14]
 
 #define TV_FOVSlider sliders[8]
 

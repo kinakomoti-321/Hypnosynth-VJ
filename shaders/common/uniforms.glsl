@@ -17,9 +17,9 @@ uniform vec4 buttons[32];
 
 #define Raytracing_Button buttons[9]
 #define Raytracing_IndexOffset buttons[10]
-#define Raytracing_SceneCheck button[11]
+#define Raytracing_IBL buttons[11]
 
-#define Raytracing_Tekitou sliders[6]
+#define Raytracing_SceneSlider sliders[6]
 #define Raytracing_Slider sliders[7]
 
 //TV_Layer

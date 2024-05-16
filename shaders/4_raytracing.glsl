@@ -13,7 +13,7 @@ out vec4 color;
 
 
 uniform sampler2D raytracing;
-
+uniform sampler2D IBL;
 uint seed;
 
 int scene_number = 0;
@@ -36,27 +36,20 @@ vec2 rnd2(){
     return vec2(rnd1(),rnd1());
 }
 
-float ifs_box(vec3 p,float time){
-    float d = 1000.0;
-    vec3 p1 = p;
-    p1 -= vec3(0.0,0.0,0.0);
-    p1.xy = rotate(p1.xy,time);
-    p1.yz = rotate(p1.yz,time);
+vec2 sphereUV(vec3 direction){
+    vec3 pos = normalize(direction);
+    float theta = acos(pos.y);
+    float phi = acos(pos.x / sqrt(pos.z * pos.z + pos.x * pos.x));
+    if(pos.z < 0.0){
+    phi *= -1.;
+    }
     
-    p1 = abs(p1) - vec3(1.0,0.0,0.1);
-    p1.xy = rotate(p1.xy,time);
-    p1.yz = rotate(p1.yz,time * 2.0 + 2.1);
-
-    for(int i = 0; i < 4; i++){
-        float dt = sdBox(p1,vec3(0.2,2.0,0.5));
-        p1 = abs(p1 - vec3(100.0)) - vec3(1.0,0.0,1.0);
-        p1.xy = rotate(p1.xy,time);
-        p1.yz = rotate(p1.yz,time * 2.0 + 2.1);
-
-        d = min(dt,d);
-    } 
-    return d;
+    float u = clamp(theta / PI,0.,1.);
+    float v = (phi + PI) / (2.0 * PI);
+    v = clamp(1.0 - v,0.,1.0);
+    return vec2(u,v);
 }
+
 
 // 0:Normal Lambert 1:Light,
 vec3 basecolor[10] = vec3[](vec3(0.8),vec3(0.8),vec3(0.8,0.2,0.2),
@@ -72,12 +65,17 @@ float metallic[10] = float[](0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0);
 
 
 float map_cornelbox(vec3 p, inout int index){
+    if(caostic >= 2){
+        p.yz = rotate(p.yz,p.x * (floor(hash11(b_beat.w + 1.0) * float(caostic - 1.0)) * 0.1) + b_beat.w);
+        p.xz = rotate(p.xz,p.y * (floor(hash11(b_beat.w) * float(caostic - 1.0)) * 0.3) + b_beat.w);
+    }
+
     if(caostic >= 1){
         p.x = repeat(p.x,2.0);
         p.y = repeat(p.y,2.0);
     }
 
-    float d1 = sdBox(p,vec3(1.0)); 
+    float d1 = sdBox(p,vec3(0.9,1.0,1.0)); 
     float d2 = sdBox(p - vec3(0.0,0.0,0.4),vec3(1.2,0.8,1.2)); 
     float d3 = sdBox(p - vec3(1.0,0.0,0.0),vec3(0.1,1.0,1.0)); 
     float d4 = sdBox(p + vec3(1.0,0.0,0.0),vec3(0.1,1.0,1.0)); 
@@ -89,7 +87,7 @@ float map_cornelbox(vec3 p, inout int index){
     float d6 = sdBox(p_box,vec3(0.2,0.3,0.2) * 1.4);
     vec3 p_box2 = p;
     p_box2 += vec3(-0.3,0.6,-0.3);
-    p_box2.xz = rotate(p_box2.xz,PI * 0.25);
+    p_box2.xz = rotate(p_box2.xz,PI * 0.1);
     float d7 = sdBox(p_box2,vec3(0.2) * 1.2);
     float d;
 
@@ -109,18 +107,82 @@ float map_cornelbox(vec3 p, inout int index){
     return d; 
 }
 
+//https://qiita.com/aa_debdeb/items/bffe5b7a33f5bf65d25b
+float dmenger(vec3 p, vec3 offset, float scale) {
+    int ITERATIONS = 5;
+    vec4 z = vec4(p, 1.0);
+    for (int i = 0; i < ITERATIONS; i++) {
+        z = abs(z);
+        if (z.x < z.y) z.xy = z.yx;
+        if (z.x < z.z) z.xz = z.zx;
+        if (z.y < z.z) z.yz = z.zy;
+        z *= scale;
+        z.xyz -= offset * (scale - 1.0);
+        if (z.z < -0.5 * offset.z * (scale - 1.0))
+            z.z += offset.z * (scale - 1.0);
+    }
+    return (length(max(abs(z.xyz) - vec3(1.0, 1.0, 1.0), 0.0))) / z.w;
+}
+
+
 float scene2_map(vec3 p, inout int index){
+    if(caostic >= 2){
+        p.yz = rotate(p.yz,p.x * (floor(hash11(b_beat.w + 1.0) * float(caostic - 1.0)) * 0.1) + b_beat.w);
+        p.xz = rotate(p.xz,p.y * (floor(hash11(b_beat.w) * float(caostic - 1.0)) * 0.3) + b_beat.w);
+    }
     vec3 p1 = p;
-    float d1 = sdBox(p1,vec3(20.0,10.0,20.0)); 
-    float d2 = sdBox(p1,vec3(19.0,9.0,19.0)); 
+    // p1.x = repeat(p1.x - 10.0,20.0);
+    // p1.y = repeat(p1.y - 10.0,20.0);
+    p1.xz = rotate(p1.xz,PI * p.y * 0.1);
+    p1.yz = rotate(p1.yz,PI * 0.5);
+    // p1.x = repeat(p1.x,4.0);
+    p1.z = repeat(p1.z,2.0);
 
-    vec3 p2 = p;
-    p2.xy = repeat(p2.xy,5.0);
-    float d3 = sdBox(p2,vec3(1.0)); 
+    if(caostic >= 1){
+    p1.xz = rotate(p1.xz,b_beat.w * PI * 0.1);
+    }
 
-    float d = opSubtraction(d2,d1);
-    index = (d3 < d) ? 1:0;
+    vec3 p2 = p1;
+    p1.xy = kaleido_pmod(p1.xy,40.0);
+
+    
+    float d1 = sdTriPrism(p1,vec2(5,0.5));
+    float d2 = sdTriPrism(p1,vec2(4.0,1.0));
+
+    float d;
+    index = 4;
+
+    d = opSubtraction(d2,d1);  
+
+
+    float d3 = sdBox(p1 -vec3(0.0,4.0,0.0),vec3(0.1,0.1,10.0));
+    index = (d3 < d) ? 1 : index;
     d = opUnion(d,d3);
+    d -= 0.01;
+    
+    return d / 2.0;
+}
+
+float scene3_map(vec3 p,inout int index){
+    float d;
+
+    vec3 p1 = p;
+
+    if(caostic >=1){
+        // p.xz = repeat(p.xz,2.0);
+    }
+    p.xy = kaleido_pmod(p.xy,floor(6.0 * hash11(b_beat.w) + 1.0));
+    // p.yz = kaleido_pmod(p.yz,floor(6.0 * hash11(b_beat.w) + 1.0));
+    d = dmenger(p,(hash31(b_beat.w)) * caostic + 1.0,1.0 * hash11(b_beat.w) * caostic + 3.0);
+    
+    // float d1 = sdBox(p1,vec3(10.0));
+    // float d2 = sdBox(p1,vec3(9.0));
+    // float d3 = sdBox(p1,vec3(10.0,45.0,10.0));
+
+    // d = opSubtraction(d2,d1);
+    // d = opSubtraction(d3,d);
+
+
     return d;
 }
 
@@ -129,17 +191,20 @@ float map(vec3 p,inout int index){
     vec3 p1 = p;
     int index1 = 1;
 
-    if(caostic >= 2){
-        p.yz = rotate(p.yz,p.x * (floor(hash11(b_beat.w + 1.0) * float(caostic - 1.0)) * 0.1) + b_beat.w);
-        p.xz = rotate(p.xz,p.y * (floor(hash11(b_beat.w) * float(caostic - 1.0)) * 0.3) + b_beat.w);
-    }
 
     if(scene_number == 0){
         d = map_cornelbox(p,index);
     }
-    else{
+    else if(scene_number == 1){
         d = scene2_map(p,index);
     }
+    else if(scene_number == 2){
+        d = scene3_map(p,index);
+    }
+    else{
+        d = map_cornelbox(p,index);
+    }
+
     return d;
 }
 
@@ -180,6 +245,7 @@ bool raymarching(vec3 ro,vec3 rd,inout IntersectInfo info){
             if(ToggleB(Raytracing_IndexOffset.w)){
                 index = int(mod(b_beat.w + (index),4));
             }
+
             info.pos = pos;
             info.normal = getnormal(pos);
             info.dist = total_d;
@@ -205,20 +271,6 @@ bool raymarching(vec3 ro,vec3 rd,inout IntersectInfo info){
     }
     return false;
 }
-
-// void tangentSpaceBasis(vec3 normal,inout vec3 t,inout vec3 b){
-//     if (abs(normal.y) < 0.9)
-//     {
-//         t = cross(normal, vec3(0, 1, 0));
-//     }
-//     else
-//     {
-//         t = cross(normal, vec3(0, 0, -1));
-//     }
-//     t = normalize(t);
-//     b = cross(t, normal);
-//     b = normalize(b);
-// }
 
 vec3 worldtoLoacal(vec3 v,vec3 lx, vec3 ly,vec3 lz){
     return vec3(v.x * lx.x + v.y* lx.y + v.z * lx.z,
@@ -257,6 +309,7 @@ vec3 Fresnel(vec3 F0, float cosine){
     float delta = (1.0 - cosine);
     return F0 + (vec3(1.0) - F0) * delta * delta * delta * delta * delta;
 }
+
 
 vec3 visibleNormalSample(vec3 wo,vec2 u,float alpha_x,float alpha_y){
     vec3 wi = normalize(vec3(wo.x * alpha_x, wo.y, wo.z * alpha_y));
@@ -302,9 +355,30 @@ vec3 MicrofacetBRDF(vec3 wo,inout vec3 wi,vec3 F0,float alpha_x,float alpha_y){
 
     vec3 BSDF = 0.25f *  ggxF * ggxG / (odotn * mdotn); 
 
-    // wi = reflect(-wo,normal);
-    // vec3 ggxF = Fresnel(F0,wo.y);
-    // vec3 BSDF = ggxF;
+    return BSDF;
+}
+
+vec3 EvalMicrofacetBRDF(vec3 wo,vec3 wi,vec3 F0,float alpha_x,float alpha_y){
+    alpha_x = alpha_x * alpha_x;
+    alpha_y = alpha_y * alpha_y;
+    vec3 normal = vec3(0,1,0);
+
+    vec3 wm = normalize(wo+wi);
+    if(wm.y < 0){
+        return vec3(0);
+    }
+
+    float idotn = abs(wi.y);
+    float odotn = abs(wo.y);
+    float idotm = abs(dot(wm,wi));
+    float mdotn = abs(wm.y);
+
+    float ggxD = ggx_D(wm,alpha_x,alpha_y);
+    float ggxG = ggx_G(wo,wi,alpha_x,alpha_y);
+    vec3 ggxF = Fresnel(F0,idotm);
+
+    vec3 BSDF = 0.25f * ggxD *  ggxF * ggxG / (odotn * idotn); 
+
     return BSDF;
 }
 
@@ -324,7 +398,7 @@ vec3 pathtrace(vec3 ro,vec3 rd){
     vec3 ray_dir = rd;
     vec3 LTE = vec3(0);
     vec3 throughput = vec3(1);
-    int MAXDEPTH = 5;
+    int MAXDEPTH = 3;
     float rossian_p = 1.0;
     for(int depth = 0; depth < 5; depth++){
         rossian_p = clamp(max(max(throughput.x,throughput.y),throughput.z),0.0,1.0);
@@ -337,7 +411,14 @@ vec3 pathtrace(vec3 ro,vec3 rd){
         IntersectInfo info;
         if(!raymarching(ray_ori,ray_dir,info)){
             if(depth != 0){
-                LTE += throughput * pow(clamp(ray_dir.y,0.0,1.0),10.0);
+                // LTE += throughput * pow(clamp(ray_dir.y,0.0,1.0),10.0);
+                // vec3 skyLight = vec3()
+                vec2 skyuv = sphereUV(ray_dir);
+                vec3 skyLight = texture(IBL,skyuv).xyz;
+                if(ToggleB(Raytracing_IBL.w)){
+                    LTE += throughput * skyLight * 1.0;
+                }
+
             }
             break;
         }
@@ -360,13 +441,40 @@ vec3 pathtrace(vec3 ro,vec3 rd){
         vec3 local_wi;
 
         vec3 bsdf;
+
+        // {
+        //     vec3 light_dir = normalize(vec3(0,1,1));
+        //     vec3 light_col = vec3(1,1,1) * 2.0;
+        //     IntersectInfo shadow_Info;
+        //     vec3 shadow_dir = light_dir;
+        //     vec3 shadow_pos = info.pos + light_dir * 0.001;
+        //     if(!raymarching(shadow_pos,shadow_dir,shadow_Info)){
+        //         local_wi = worldtoLoacal(shadow_dir,t,normal,b);
+        //         if(info.metallic < 0.5){
+        //             bsdf = info.basecol / PI;
+        //             LTE += bsdf * light_col * local_wi.y;
+        //         }
+        //         else{
+        //             bsdf = MicrofacetBRDF(local_wo,local_wi,info.basecol,info.roughness.x,info.roughness.y);
+        //         }
+        //     }
+        // }
+        
+
         if(info.metallic < 0.5){
             bsdf = LambertBRDF(local_wo,local_wi,info.basecol);
         }
         else{
             bsdf = MicrofacetBRDF(local_wo,local_wi,info.basecol,info.roughness.x,info.roughness.y);
         }
+        // if(info.metallic < 0.5){
+        //     bsdf = LambertBRDF(local_wo,local_wi,info.basecol);
+        // }
+        // else{
+        //     bsdf = MicrofacetBRDF(local_wo,local_wi,info.basecol,info.roughness.x,info.roughness.y);
+        // }
 
+        // pdf = 1.0;
         throughput *= bsdf;
 
 
@@ -386,7 +494,8 @@ void main(){
     
     caostic = int(Raytracing_Slider * 4);
 
-    scene_number = 0;
+    scene_number = int(Raytracing_SceneSlider * 4);
+    
     vec2 rotuv = uv * rot(hash11(b_beat.w) * TAU);
     // if(rotuv.x > 0.0){
     //     scene_number = 1;
@@ -399,12 +508,19 @@ void main(){
     ro = (ro * 2.0) - 1.0;
     float range = 2.0;
     if(caostic > 0) range = 10.0;
+    if(scene_number == 2) range = 10.0;
+    
     ro *= range;
     ro.z = abs(ro.z) + range;
-    // ro = vec3(0,0,6);
+
     vec3 atlook = vec3(0.0);
 
-    vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w),0.000,rnd2());
+    if(scene_number == 1) {
+    atlook = vec3(0,10.0,0);
+    ro.z -= 5.0;
+    }
+
+    vec3 rd = GetCameraDir(ro,atlook,uv,90.0 * hash11(b_beat.w) + 10.0,0.000,rnd2());
 
     vec3 col = vec3(0.0);
     

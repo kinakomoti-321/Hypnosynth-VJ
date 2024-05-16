@@ -56,3 +56,6 @@ images:
    - path: "./img/VAT_Umishida.png"
      name: "VAT_test"
      filter: nearest
+   - path: "./img/IBL.png"
+     name: "IBL"
+     filter: nearest

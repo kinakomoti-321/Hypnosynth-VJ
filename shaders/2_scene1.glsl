@@ -83,5 +83,13 @@ void main() {
 
     col = back_ground;
 
+    //inspire
+    //https://www.shadertoy.com/view/wtlcR8
+    int x = int(gl_FragCoord.x);
+    int y = int(gl_FragCoord.y + time * 10.0);
+    int r = (x+y)^(x-y);
+    bool b = abs(r*r*r + y + int(time * 100.0 * sliders[4])) % int(hash11(b_beat.w) * 1892.0 + 500.0) < 1000 * sliders[5];
+    col = b? vec3(1.0) : vec3(0.0);
+
     color = vec4(col,1.0);
 }

@@ -143,6 +143,36 @@ vec3 font(vec2 uv,int id){
      
 // }
 
-// vec3 CharAndNumber(vec2 uv,int hash,int number){
+vec3 CharAndNumber(vec2 text_uv,in int chars[8],int number){
+    text_uv *= 20.0;
 
-// }
+    float width_font = 0.65;
+    int offset = int(text_uv.x / width_font);
+    int line = int(text_uv.y / 1.1);
+    text_uv = mod(text_uv,vec2(width_font,1.1));
+
+    int font_index = 0;
+    if(offset < 8){
+        font_index = chars[offset];
+    }
+    else if(offset == 8){
+        font_index = 78;
+    }
+    else if(offset <= 11 && offset > 8){
+        int number_offset = 11 - offset;
+        int pows = (number / int(pow(10.0,float(number_offset)))) % 10;   
+        font_index = pows + 1;
+    }
+
+    if(RedModeON) font_index = 63;
+
+    vec3 col = font(text_uv,font_index);
+
+    // col = vec3(float(line) / 10.0);
+    
+    //col = vec3(text_uv,1.0);
+
+    if(line != 5) col = vec3(0.0);
+    if(offset < 0 || offset > 12) col = vec3(0.0);
+    return col;
+}

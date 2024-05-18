@@ -44,11 +44,16 @@ stages:
 
   - fs: "./shaders/postEffect_layer.glsl"
 
+audio:
+  audio_samples: 1000
+  spectrum:
+    mipmap: true
+    filter: linear
+    wrap_mode: repeat
+
 ndi:
   - source: "0youtube-spout"
     name: "NDI_0"
-  - source: "1youtube-spout"
-    name: "NDI_1"
 
 images:
    - path: "./img/hypnosynth_logo_white.png"

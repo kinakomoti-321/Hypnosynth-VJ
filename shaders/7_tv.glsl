@@ -195,13 +195,13 @@ vec3 getnormal(vec3 p){
     ));
 } 
 
-
 vec3 tebureOffset(vec2 pos,float stime){
     float x = cyclicNoise(vec3(pos,stime),2) * 2.0 - 1.0; 
     float y = cyclicNoise(vec3(pos + 1.0,stime),2) * 2.0 - 1.0; 
     float z = cyclicNoise(vec3(pos + 2.0,stime),2) * 2.0 - 1.0; 
     return vec3(x,y,z);
 }
+
 void main() {
     seed = uint(time * 64) * uint(gl_FragCoord.x + gl_FragCoord.y * resolution.x);
     vec2 uv =  (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
@@ -214,8 +214,7 @@ void main() {
     // vec3 nowPos = hash31(b_beat.w) * 10.0;
     // vec3 ro = mix(prePos,nowPos, vec3(clamp(powEase(b_beat.y,20.0),0.0,1.0)));
 
-    vec3 ro = vec3(1.6,
-    0.0,0.0);
+    vec3 ro = vec3(1.6,0.0,0.0);
 
     if(ToggleB(TV_StartButton.w)){
         ro = mix(ro,vec3(5.0,0.0,0.0),TV_FOVSlider);

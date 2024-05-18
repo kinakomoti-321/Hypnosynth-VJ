@@ -39,8 +39,8 @@ vec2 rnd2(){
     return vec2(rnd1(),rnd1());
 }
 
-vec3 Movie(vec2 texuv){
-    // texuv = mod(texuv,1.0);
+vec3 Movie(vec2 texuv,vec3 tv_index){
+
     vec3 col;
     vec2 uv = texuv * 2.0 - 1.0;
 
@@ -79,11 +79,12 @@ vec3 Movie(vec2 texuv){
     float percent = NoiseSlider;
     float noiseOn = float(percent < hash11(uv.y * time)); 
 
-    float _noiseX = hash11(uv.y * time *3.0) * noiseOn;
+    float beatPin = Beat(b_beat.y,2.0);
+    float _noiseX = hash11(uv.y * time *3.0) * noiseOn  * (beatPin + 0.01);
     float _sinNosiseWidth = hash11(time *3.0) - 0.5;
     float _sinNosiseOffset = hash11(time + 1.0) - 0.5;
     float _sinNoiseScale = hash11(time *3.0) - 0.5;
-    _sinNoiseScale  = (NoiseSlider < 0.5) ? 0.5 - NoiseSlider : 0.0;
+    _sinNoiseScale  = (1.0 - NoiseSlider) * (beatPin * 0.1);
 
     // texuv.x += sin(uv.y * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
 
@@ -141,7 +142,7 @@ vec3 Movie(vec2 texuv){
 struct SDFInfo{
     int index;
     vec2 uv;
-    int TV_index;
+    vec3 TV_index;
 };
 
 float tv_map(vec3 p,inout SDFInfo info){
@@ -176,7 +177,10 @@ float tv_map(vec3 p,inout SDFInfo info){
 
 
 float map(vec3 p,inout SDFInfo info){
+    
     p.yz -= 1.05;
+    // int tv_index = int(hash13(floor(p / 2.1)) * 10000.0);
+    info.TV_index = floor(p / 2.1);
     p.yz = repeat(p.yz,2.1);
     
     float d = tv_map(p,info);
@@ -218,7 +222,7 @@ void main() {
 
     if(ToggleB(TV_StartButton.w)){
         ro = mix(ro,vec3(5.0,0.0,0.0),TV_FOVSlider);
-        ro += tebureOffset(ro.yz,time) * 0.1 * TV_FOVSlider;
+        ro += tebureOffset(ro.yz,time) * 0.2 * smoothstep(0,1,TV_FOVSlider);
     }
 
     vec3 transform = vec3(0,0,TVSize * b_beat.w);
@@ -256,7 +260,7 @@ void main() {
             // col = getnormal(pos);
             if(info.index == 1){
                 col = vec3(info.uv,0.0);
-                col = Movie(info.uv);
+                col = Movie(info.uv,info.TV_index);
             }
             else{
                 

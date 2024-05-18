@@ -53,7 +53,7 @@ ndi:
 images:
    - path: "./img/hypnosynth_logo_white.png"
      name: "PlotLogo"
-   - path: "./img/VAT_Umishida.png"
+   - path: "./img/VAT.png"
      name: "VAT_test"
      filter: nearest
    - path: "./img/IBL.png"

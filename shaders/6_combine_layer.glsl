@@ -48,7 +48,7 @@ void main() {
         color /= color.a;
         color *=1.5;
     }
-    if(ToggleB(LogoButton.w)){
+    if(ToggleB(Logo_MaskButton.w)){
         vec4 color_logo = texture(logo_layer,texuv);
         color = mix(color,color_logo,vec4(color_logo.a));
     }
@@ -66,7 +66,8 @@ void main() {
         color = texture(combine_layer,mod(texuv + vec2(velo_int * dxy),1.0));
     }
 
-
-
+    if(RedModeON){
+        color.rgb *= vec3(1.0,0.1,0.1);
+    }
     Out_color = color;
 }

@@ -18,10 +18,10 @@ uniform vec4 VAT_test_res;
 
 #define VertexRrandomSlider sliders[0]
 float ConvertBinaryToFloat(vec4 binary_col){
-    uint b1 = uint(binary_col.r * 255.0);
-    uint b2 = uint(binary_col.g * 255.0);
-    uint b3 = uint(binary_col.b * 255.0);
-    uint b4 = uint(binary_col.a * 255.0);
+    uint b1 = uint(binary_col.r * 255.0 + 0.5);
+    uint b2 = uint(binary_col.g * 255.0 + 0.5);
+    uint b3 = uint(binary_col.b * 255.0 + 0.5);
+    uint b4 = uint(binary_col.a * 255.0 + 0.5);
 
     uint f = uint(0);
     f |= b1;
@@ -65,16 +65,16 @@ void main() {
     float y = (test.y < 0.5) ? -1 : 1;
     float z = (test.z < 0.5) ? -1 : 1;
 
-    int maxVertID =  int(time);
+    int maxVertID =  int(100000);
     int VertID = (gl_VertexID < maxVertID) ? gl_VertexID : maxVertID ;
 
     vec3 rand = easeHash31(b_beat.w,b_beat.y,10);
-    vec3 p =GetVATPosition(uint(VertID)) * 0.4;
+    vec3 p =GetVATPosition(uint(VertID)) * 0.1;
     p += stepFunc(VertexRrandomSlider,0.25) * (hash34(vec4(p,floor(time))) * 2.0 - 1.0);
     p.xz = rotate(p.xz,rand.y * TAU * 1.5 + time * 0.1);
     p.yz = rotate(p.yz,rand.x * TAU * 1.5);
 
-    float far_clip = 1.0 * rand.z;
+    float far_clip = 10.0 * rand.z;
     p.z -= rand.z;
     vec3 proj_p = vec3(p.xy,p.z/far_clip);
     proj_p.xy *= (1.0 - proj_p.z);

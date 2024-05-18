@@ -139,3 +139,10 @@ vec3 font(vec2 uv,int id){
     return vec3(tex); 
 }
 
+// vec3 channel(vec2 uv, int i){
+     
+// }
+
+// vec3 CharAndNumber(vec2 uv,int hash,int number){
+
+// }

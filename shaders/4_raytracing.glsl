@@ -11,7 +11,6 @@ out vec4 color;
 #pragma include "./shaders/common/benri.glsl"
 #pragma include "./shaders/common/constant.glsl"
 
-
 uniform sampler2D raytracing;
 uniform sampler2D IBL;
 uint seed;
@@ -500,6 +499,10 @@ void main(){
     // if(rotuv.x > 0.0){
     //     scene_number = 1;
     // }
+    if(RedModeON) caostic += 1; 
+    if(ToggleB(Logo_MaskButton.w)){
+        
+    }
 
     vec3 prePos = hash31(b_beat.w - 1.0); 
     vec3 nowPos = hash31(b_beat.w);

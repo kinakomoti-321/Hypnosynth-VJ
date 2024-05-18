@@ -11,6 +11,7 @@ out vec4 color;
 #pragma include "./shaders/common/benri.glsl"
 
 uniform sampler2D PlotLogo;
+uniform sampler2D logo_layer;
 
 #define BPM 150
 #define Beat time * BPM / 60
@@ -62,6 +63,9 @@ void main() {
     // vec3 p = vec3(uv * 5 + offsetCurl((uv + beatTime) * 5.0,0.5 * Toggle(buttons[1].w)),offset * 1.0);
     //col = vec3(cyclicNoise(p,4)) * 0.5;
 
+    vec4 logo_Mask = vec4(0.0);
+    if(ToggleB(Logo_MaskButton.w - 1.0)) logo_Mask = texture(logo_layer,stepFunc(tuv,0.01)); 
+
     //-----
     //Mask
     //-----
@@ -79,17 +83,22 @@ void main() {
         back_mask = vec3(1.0);
     }
 
-    back_ground *= back_mask * sliders[1];
+    if(int(b_beat.w) % 4 == 0) back_mask = vec3(1.0);
+    if(ToggleB(Logo_MaskButton.w - 1.0)) back_mask += logo_Mask.x; 
 
-    col = back_ground;
+    col = back_ground * back_mask;
 
     //inspire
     //https://www.shadertoy.com/view/wtlcR8
     int x = int(gl_FragCoord.x);
     int y = int(gl_FragCoord.y + time * 10.0);
     int r = (x+y)^(x-y);
-    bool b = abs(r*r*r + y + int(time * 100.0 * sliders[4])) % int(hash11(b_beat.w) * 1892.0 + 500.0) < 1000 * sliders[5];
-    col = b? vec3(1.0) : vec3(0.0);
+
+
+    bool b = abs(r*r*r + y + int(time * (10.0 + logo_Mask.x * 100.0))) % int(hash11(b_beat.w) * 1892.0 + 500.0) < (1000 * sliders[5] + logo_Mask.x * 500);
+    vec3 circuit_col = b? vec3(1.0) : vec3(0.0);
+
+    if(ToggleB(SceneCircuit.w)) col = circuit_col;
 
     color = vec4(col,1.0);
 }

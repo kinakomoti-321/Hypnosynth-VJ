@@ -9,9 +9,14 @@ uniform vec4 buttons[32];
 #define b_beat buttons[0]
 #define Vertex_Button buttons[3]
 
+#define RedMode buttons[1]
+#define RedModeON ToggleB(RedMode.w)&&(int(b_beat.w) % 4 == 0)
+
 //Logo Layer
 #define LogoSlider sliders[2]
 #define LogoButton buttons[3]
+#define UI_Button buttons[4]
+#define Logo_MaskButton buttons[5]
 
 // #define Raytracing_Button buttons[]
 
@@ -29,10 +34,11 @@ uniform vec4 buttons[32];
 
 #define TV_FOVSlider sliders[8]
 
-#define NoiseSlider sliders[13]
+#define NoiseSlider 1.0 - sliders[13]
 
 //Scene1
 #define SceneButton buttons[6]
+#define SceneCircuit buttons[7]
 
 
 #define PixelFluid_Button buttons[18]
@@ -40,7 +46,8 @@ uniform vec4 buttons[32];
 #define MFButton buttons[20]
 
 //PostProcess
-#define AbsorbSlider sliders[15]
+// #define AbsorbSlider sliders[15]
+#define Global_slider sliders[15]
 #define Laplacian_Button buttons[21]
 #define ParupunteFilter_Button button[22] //Dengerous
 #define FakePixelFilter_Button buttons[23]

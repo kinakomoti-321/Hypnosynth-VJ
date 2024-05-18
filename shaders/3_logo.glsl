@@ -16,11 +16,8 @@ uniform sampler2D PlotLogo;
 #define BPM 150
 #define Beat time * BPM / 60
 
+uniform sampler2D logo_layer;
 uniform sampler2D VAT_test;
-
-#define Log_Button buttons[4]
-#define Logo_CaosSlider sliders[4]
-
 
 vec3 getNormal(vec2 uv,float offset,int octaves){
     vec2 eps = vec2(0.001,0.0);
@@ -64,6 +61,11 @@ void main() {
 
     vec4 plogo;
     logouv.y /= 0.7;
+    
+    if(RedModeON){
+        logouv *= 5.0;
+        logouv = mod(logouv,1.0);
+    }
     if(logo_index == 0){
         plogo = texture(PlotLogo,logouv);
     }
@@ -71,35 +73,33 @@ void main() {
         logouv+= offsetCurl((uv) * 5.0,0.5 );
         plogo = texture(PlotLogo,logouv);
     }
+    else if(logo_index == 2){
+        plogo = texture(PlotLogo,stepFunc(logouv,0.1));
+    }
+    else if(logo_index == 3){
+        logouv *= 2.0;
+        logouv.x = mod(logouv.x * 1.8,0.8);
+        logouv.y -= 0.8;
+        vec3 hatena =font(logouv,int(hash11(b_beat.w) * 80));
+        plogo = vec4(hatena,hatena.x);
+    }
+    else if(logo_index == 4){
+        logouv += (hash22(floor(logouv * 100.0)) * 2.0 - 1.0) * 0.1;
+        plogo = texture(PlotLogo,logouv);
+    }
+
+
 
     if(logouv.x < 0.0 || logouv.x >= 0.999) plogo = vec4(0.0);
 
     vec2 uv_text = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
 
+    vec2 UIuv1 = uv_text;
+
     int text_index = int(mod(time_counter,4.0));
 
-    if(text_index == 1){
-        uv_text.x = abs(uv_text.x) - 1.0;
-    }
-    else if(text_index == 2){
-        uv_text -= 1.0;
-        uv_text += hash22(floor(uv_text * 10.0));
-    }
-    else if(text_index == 3){
-        if(gl_FragCoord.x / resolution.x > 0.5)
-        {
-            uv_text.x = 1.0 - abs(uv_text.x) - 1.0;
-            uv_text.y = -uv_text.y;
-        }
-    }
-    else if(text_index == 4){
-        uv_text -= 1.0;
-        uv_text += hash22(floor(uv_text * 10.0));
-    }
-
-
-    uv_text += 1.0;
-    vec2 uv1 = (uv_text) * 40.0;
+    uv_text += 0.5;
+    vec2 uv1 = (uv_text) * 50.0;
     
     float log_time = time * 10.0;
     uv1.y -= floor(log_time) * 1.2;
@@ -114,27 +114,50 @@ void main() {
     vec2 rnd_index = vec2(hash11(float(index.y)),hash12(vec2(index)));
     int max_char = int(rnd_index.x * float(LineMaxLength));
 
-    int char_index = int(rnd_index.y * 94.0);
-    //int char_index = int(rnd_index.y * 100.0); //Bug
-
-
+    int char_index = int(rnd_index.y * 94.0 + sliders[3] * 10.0);
+    // int char_index = int(rnd_index.y * 120.0); //Bug
+    if(RedModeON) char_index = 63;
     char_index = (index.x < max_char) ? char_index : 0;
+    vec3 text_col;
+    text_col = vec3(font(uv1,char_index)) * 0.8; 
 
-    col = vec3(font(uv1,char_index)) * 0.8; 
 
-    if(isLine == index.y) 
+    if(isLine == index.y ) 
     {
-        col *= float(line_mask);
+        text_col *= float(line_mask);
     }
     else{
-        col *= float(index.x < LineMaxLength);
-        col *= float(index.y > isLine);
+        text_col *= float(index.x < LineMaxLength);
+        text_col *= float(index.y > isLine);
     }
 
-    if(ToggleB(Log_Button.w)){col = vec3(0.0);}
+    UIuv1 += vec2(0.45,0.0);
+    float UV1_Window_sdf = sdBox(UIuv1,vec2(0.2,0.3));
+
+    if(UV1_Window_sdf > 0.0){
+        col = vec3(0.0);
+    }
+    else{
+        col = text_col;
+        col += vec3(float((1.0 - abs(UV1_Window_sdf)) > 0.999));
+    }
+
+
+    //--------------
+    //UI
+    //--------------
+    vec2 UV2 = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
+
+
+
+
+
+
+
+    if(ToggleB(UI_Button.w)){col = vec3(0.0);}
 
     // col *= vec3(0.0,0.7,0.0);
-    col = mix(col,vec3(1.0),plogo.w);
+    if(ToggleB(LogoButton.w)){col = mix(col,vec3(1.0),plogo.w);}
 
     float alpha = (col.x > 0.0) ? 1.0 : 0.0;
     color = vec4(col,alpha);

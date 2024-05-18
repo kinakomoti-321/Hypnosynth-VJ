@@ -102,7 +102,7 @@ vec3 Movie(vec2 texuv){
     }
 
 
-    float absorbPower = AbsorbSlider + step(glass_factor,0.001);
+    float absorbPower = 0.1 + step(glass_factor,0.001) + pow(length(uv),2.0) * 0.02;
     vec2 Roffset = vec2(-0.01,0.0) *absorbPower;
     vec2 Goffset = vec2(0.0,0.0) * absorbPower;
     vec2 Boffset = vec2(0.01,0.0) * absorbPower;

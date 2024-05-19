@@ -74,3 +74,6 @@ images:
    - path: "./img/Code_Raytracing.png"
      name: "RaytracingCode"
      filter: nearest
+   - path: "./img/ColorBar.png"
+     name: "ColorBar"
+     filter: nearest

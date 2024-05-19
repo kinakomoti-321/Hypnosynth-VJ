@@ -118,6 +118,7 @@ void main() {
     int channelID = 1;
     if(ToggleB(SceneButton.w)) channelID = 2;
     if(ToggleB(Raytracing_Button.w)) channelID = 3;
+    if(ColorBarON)channelID = 4;
 
     if(logouv.x < 0.0 || logouv.x >= 0.999) plogo = vec4(0.0);
 
@@ -146,7 +147,7 @@ void main() {
         vec2 logTextureUV = mod(logIndex / RaytracingCode_res.xy,1.0);
         textDeta = texture(RaytracingCode,logTextureUV).xy * 15.0;
     }
-    
+
     int char_id1 = int(textDeta.x);
     int char_id2 = int(textDeta.y);
 

@@ -16,6 +16,8 @@ uniform sampler2D logo_layer;
 uniform sampler2D vertex;
 uniform sampler2D tv_layer;
 
+uniform sampler2D ColorBar;
+
 uniform sampler2D combine_layer;
 
 uniform sampler2D NDI_0;
@@ -47,6 +49,10 @@ void main() {
         color = texture(accumulate_layer,texuv);
         color /= color.a;
         color *=1.5;
+    }
+
+    if(ColorBarON){
+        color = texture(ColorBar,texuv);
     }
     if(ToggleB(Logo_MaskButton.w)){
         vec4 color_logo = texture(logo_layer,texuv);

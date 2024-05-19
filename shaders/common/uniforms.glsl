@@ -11,6 +11,7 @@ uniform vec4 buttons[32];
 
 #define RedMode buttons[1]
 #define RedModeON ToggleB(RedMode.w)&&(int(b_beat.w) % 4 == 0)
+#define ColorBarON !ToggleB(buttons[2].w)
 
 //Logo Layer
 #define LogoSlider sliders[2]

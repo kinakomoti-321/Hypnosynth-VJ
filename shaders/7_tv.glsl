@@ -18,6 +18,7 @@ uniform sampler2D logo_layer;
 uniform sampler2D vertex;
 uniform sampler2D tv_layer;
 uniform sampler2D combine_layer;
+uniform sampler2D ColorBar;
 
 #define TVSize 2.1
 uint seed;
@@ -229,7 +230,8 @@ void main() {
 
     if(ToggleB(TV_StartButton.w)){
         ro = mix(ro,vec3(5.0,0.0,0.0),TV_FOVSlider);
-        ro += tebureOffset(ro.yz,time) * 0.2 * smoothstep(0,1,TV_FOVSlider);
+        vec3 hashoffset = easeHash31(b_beat.w,b_beat.y,10.0) * 2.0 - 1.0;
+        ro += tebureOffset(ro.yz,time) * 0.2 * smoothstep(0,1,TV_FOVSlider) + hashoffset * sliders[9] * 3.0;
     }
 
     vec3 transform = vec3(0,0,TVSize * b_beat.w);
@@ -244,7 +246,7 @@ void main() {
     //vec3 ro = vec3(0,0,-10);
     vec3 atlook = vec3(0.0);
 
-    if(ToggleB(TV_MoveButton.w)){    
+    if(ToggleB(TV_MoveButton.w) && ToggleB(b_beat.w)){    
         ro += offset; 
         atlook += offset;   
     }
@@ -276,7 +278,7 @@ void main() {
                     if(pattern_number == 1) select = hash11(info.TV_index.y);
                     if(pattern_number == 2) select = hash11(info.TV_index.z);
                     if(pattern_number == 3) select = hash12(mod(info.TV_index.yz,2.0));
-                    float percents = 0.2;
+                    float percents = 0.15;
                     select = mod(select + ScreenOffsetSlider,1.0);
                     
 
@@ -287,7 +289,7 @@ void main() {
                         col = Movie(info.uv,info.TV_index,logo_layer);
                     }
                     else if(select < percents * 3.0){
-                        col = Movie(info.uv,info.TV_index,accumulate_layer);
+                        col = Movie(info.uv,info.TV_index,raytracing);
                     }
                     else if(select < percents * 4.0){
                         col = Movie(info.uv,info.TV_index,scene1);
@@ -296,7 +298,7 @@ void main() {
                         col = Movie(info.uv,info.TV_index,vertex);
                     }
                     else if(select < percents * 6.0){
-                        col = Movie(info.uv,info.TV_index,vertex);
+                        col = Movie(info.uv,info.TV_index,ColorBar);
                     }
                     else if(select < percents * 7.0){
                         col = Movie(info.uv,info.TV_index,vertex);

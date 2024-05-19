@@ -70,10 +70,14 @@ void main() {
 
     vec3 rand = easeHash31(b_beat.w,b_beat.y,10);
     vec3 p =GetVATPosition(uint(VertID)) * 0.1;
+    float iTime = time;
     float randomness = stepFunc(VertexRrandomSlider,0.25);
-    if(RedModeON) randomness = 1.0;
-    p += randomness * (hash34(vec4(p,floor(time))) * 2.0 - 1.0);
-    p.xz = rotate(p.xz,rand.y * TAU * 1.5 + time * 0.1);
+    if(RedModeON){
+        randomness = 1.0;
+        iTime *= 10.0 *time;
+    }
+    p += randomness * (hash34(vec4(p,floor(iTime))) * 2.0 - 1.0);
+    p.xz = rotate(p.xz,rand.y * TAU * 1.5 + iTime * 0.1);
     p.yz = rotate(p.yz,rand.x * TAU * 1.5);
 
     float far_clip = 10.0 * rand.z;

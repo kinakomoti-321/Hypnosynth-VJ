@@ -16,8 +16,31 @@ uniform sampler2D logo_layer;
 #define BPM 150
 #define Beat time * BPM / 60
 
+
 uniform sampler2D VAT_test;
 
+//https://www.shadertoy.com/view/7dlfWn
+vec2 triangle_wave(vec2 a,float scale){
+    return abs(fract((a + vec2(1.1,1.5))*scale)-.5);
+}
+
+#define Pi 3.141529
+
+vec3 gem_pattern(vec2 uv,float offset,float iTime){
+    vec3 col;
+    vec2 uv1 = uv;
+    float scale = 1.5;
+
+    for(int i=0;i<6;i++)
+    {
+        uv = triangle_wave(uv + offset * 0.01,scale);
+        uv = triangle_wave(uv.yx,scale) + triangle_wave(uv-1.5 + iTime * 0.1 + offset,scale);
+        col.x = (uv.x + uv.y);
+        col = abs(col.yzx - vec3(col.y * 0.4,col.x * 0.7,col.z * 0.3)) * abs(sin(min(time,Pi/2.0)));
+    }
+    
+    return col;
+}
 vec3 getNormal(vec2 uv,float offset,int octaves){
     vec2 eps = vec2(0.001,0.0);
     int dammy = 0;
@@ -94,11 +117,27 @@ void main() {
     int y = int(gl_FragCoord.y + time * 10.0);
     int r = (x+y)^(x-y);
 
-
     bool b = abs(r*r*r + y + int(time * (10.0 + logo_Mask.x * 100.0))) % int(hash11(b_beat.w) * 1892.0 + 500.0) < (1000 * sliders[5] + logo_Mask.x * 500);
     vec3 circuit_col = b? vec3(1.0) : vec3(0.0);
 
     if(ToggleB(SceneCircuit.w)) col = circuit_col;
+
+    vec2 uvTriCircuit = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
+    float offset = 0.0;
+    offset = logo_Mask.x;
+    float iTime = time + b_beat.w + powEase(b_beat.y,10);
+    if(RedModeON) iTime *= 10.0;
+    vec3 TriColor = gem_pattern(uvTriCircuit,offset,iTime);
+
+    if(ToggleB(SceneTriCircuit.w)) {
+        if(length(TriColor) > 0.9){
+            col = vec3(TriColor.x);
+        }
+        else{
+            col = vec3(0.0);
+        }
+    }
+    
 
     color = vec4(col,1.0);
 }

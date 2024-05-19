@@ -43,6 +43,7 @@ uniform vec4 buttons[32];
 //Scene1
 #define SceneButton buttons[6]
 #define SceneCircuit buttons[7]
+#define SceneTriCircuit buttons[8]
 
 
 #define PixelFluid_Button buttons[18]

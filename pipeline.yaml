@@ -9,14 +9,15 @@ stages:
     resolution: [1440,1080]
     target: "scene1"
   
-  - fs: "./shaders/3_logo.glsl"
-    resolution: [1440,1080]
-    target: "logo_layer"
-
   - fs: "./shaders/4_raytracing.glsl"
     resolution: [1440,1080]
     target: "raytracing"
     float: true
+    
+  - fs: "./shaders/3_logo.glsl"
+    resolution: [1440,1080]
+    target: "logo_layer"
+
 
   - fs: "./shaders/5_accumulate_layer.glsl"
     resolution: [1440,1080]
@@ -63,4 +64,7 @@ images:
      filter: nearest
    - path: "./img/IBL.png"
      name: "IBL"
+     filter: nearest
+   - path: "./img/vertex_code.png"
+     name: "VertexCode"
      filter: nearest

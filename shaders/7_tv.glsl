@@ -39,20 +39,23 @@ vec2 rnd2(){
     return vec2(rnd1(),rnd1());
 }
 
-vec3 Movie(vec2 texuv,vec3 tv_index){
+vec3 Movie(vec2 texuv,vec3 tv_index,sampler2D targetTex){
 
     vec3 col;
     vec2 uv = texuv * 2.0 - 1.0;
 
     float glass_factor = 1.0;
     int id = 0;
+
+    float hashoffset = hash13(tv_index) * 100.0;
+
     if(ToggleB(GlassFilter_Button.w)){
         float d = 1000.0;
         float d2 = 999.0;
         for(int i = 0; i < 16; i++){
             float theta = TAU * float(i) / 8.0;
             float radius = 0.1;
-            vec2 p_pos = vec2(cos(theta),sin(theta)) * radius + hash21(i + b_beat.w * 16) * 0.02 + (hash21(b_beat.w) * 2.0 - 1.0 )* 0.4;
+            vec2 p_pos = vec2(cos(theta),sin(theta)) * radius + hash21(i + b_beat.w * 16 + hashoffset) * 0.02 + (hash21(b_beat.w + hashoffset) * 2.0 - 1.0 )* 0.4;
             vec2 glass_uv = uv + fract(simplexNoise(uv * 10.0) * 10.0) * 0.004;
             float dist = length(glass_uv - p_pos);
 
@@ -66,8 +69,8 @@ vec3 Movie(vec2 texuv,vec3 tv_index){
             }
         }
 
-        texuv += (hash21(id) * 2.0 - 1.0) * 0.1;
-        uv += (hash21(id) * 2.0 - 1.0) * 0.1;
+        texuv += (hash21(id+ hashoffset) * 2.0 - 1.0) * 0.1;
+        uv += (hash21(id+ hashoffset) * 2.0 - 1.0) * 0.1;
         texuv = mod(texuv,1.0);
 
         glass_factor = d2 - d;
@@ -77,31 +80,33 @@ vec3 Movie(vec2 texuv,vec3 tv_index){
     if(uv.x < -1.0||uv.x > 1.0 || uv.y < -1.0||uv.y > 1.0 ) exception = vec3(0.0);
 
     float percent = NoiseSlider;
-    float noiseOn = float(percent < hash11(uv.y * time)); 
+    float noiseOn = float(percent < hash11(uv.y * time+ hashoffset)); 
 
     float beatPin = Beat(b_beat.y,2.0);
-    float _noiseX = hash11(uv.y * time *3.0) * noiseOn  * (beatPin + 0.01);
-    float _sinNosiseWidth = hash11(time *3.0) - 0.5;
-    float _sinNosiseOffset = hash11(time + 1.0) - 0.5;
-    float _sinNoiseScale = hash11(time *3.0) - 0.5;
+    float _noiseX = hash11(uv.y * time *3.0+ hashoffset) * noiseOn  * (beatPin + 0.01);
+    float _sinNosiseWidth = hash11(time *3.0+ hashoffset) - 0.5;
+    float _sinNosiseOffset = hash11(time + 1.0+ hashoffset) - 0.5;
+    float _sinNoiseScale = hash11(time *3.0+ hashoffset) - 0.5;
     _sinNoiseScale  = (1.0 - NoiseSlider) * (beatPin * 0.1);
 
     // texuv.x += sin(uv.y * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
 
+
     if(ToggleB(GlassFilter_Button.w)){
-        if(hash11(float(id)) < 0.5){
-            texuv.x += (hash11(floor(uv.y * 300.0) + time) - 0.5) * _noiseX ;
+        if(hash11(float(id)+ hashoffset) < 0.5){
+            texuv.x += (hash11(floor(uv.y * 300.0) + time+ hashoffset) - 0.5) * _noiseX ;
             texuv.x += sin(uv.y * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
         }else{
-            texuv.y += (hash11(floor(uv.x * 300.0) + time) - 0.5) * _noiseX ;
+            texuv.y += (hash11(floor(uv.x * 300.0) + time+ hashoffset) - 0.5) * _noiseX ;
             texuv.y += sin(uv.x * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
         }
     }
     else{
         texuv.x += sin(uv.y * _sinNoiseScale + _sinNosiseOffset) * _sinNoiseScale;
-        texuv.x += (hash11(floor(uv.y * 300.0) + time) - 0.5) * _noiseX ;
+        texuv.x += (hash11(floor(uv.y * 300.0) + time+ hashoffset) - 0.5) * _noiseX ;
     }
 
+    // sampler2D targetTex;
 
     float absorbPower = 0.1 + step(glass_factor,0.001) + pow(length(uv),2.0) * 0.02;
     vec2 Roffset = vec2(-0.01,0.0) *absorbPower;
@@ -109,9 +114,9 @@ vec3 Movie(vec2 texuv,vec3 tv_index){
     vec2 Boffset = vec2(0.01,0.0) * absorbPower;
 
     //RGB
-    float r = texture(combine_layer, texuv + Roffset).x;
-    float g = texture(combine_layer, texuv + Goffset).y;
-    float b = texture(combine_layer, texuv + Boffset).z;
+    float r = texture(targetTex, texuv + Roffset).x;
+    float g = texture(targetTex, texuv + Goffset).y;
+    float b = texture(targetTex, texuv + Boffset).z;
 
     // vec3 col = texture(bloom_combine, texuv).xyz;
     col = vec3(r,g,b);
@@ -119,15 +124,16 @@ vec3 Movie(vec2 texuv,vec3 tv_index){
     if(ToggleB(GlassFilter_Button.w)){
         float u = uv.y;
         vec2 glass_uv = uv.yy;
-        if(hash11(float(id) * 8.0 + b_beat.w) > 0.5){ 
+        if(hash11(float(id) * 8.0 + b_beat.w+ hashoffset) > 0.5){ 
+
             u = uv.x;
             glass_uv = uv.xx;
         }
 
         // u += hash11(floor(time * 20.0) + u * 100.0) * 100.0;  
-        u = floor((u + hash11(id)) * 700.00);
+        u = floor((u + hash11(id)+ hashoffset) * 700.00);
     
-        if(hash11(u) > 0.95 * NoiseSlider) col = texture(combine_layer,mod(glass_uv,1.0)).xyz * hash31(u); 
+        if(hash11(u+ hashoffset) > 0.95 * NoiseSlider) col = texture(targetTex,mod(glass_uv,1.0)).xyz * hash31(u+ hashoffset); 
     }
 
 
@@ -135,6 +141,7 @@ vec3 Movie(vec2 texuv,vec3 tv_index){
     // col = col * (1.0 + 0.6 * step(sin((texuv.y + hash11(texuv.x + time) * 0.01) * 2.0 + time),-0.99));
     col *= exception;
 
+    if(RedModeON) col.xyz *= vec3(1.0,0.1,0.1);
     //col = logo_col.xyz; 
     return col;
 }
@@ -260,7 +267,48 @@ void main() {
             // col = getnormal(pos);
             if(info.index == 1){
                 col = vec3(info.uv,0.0);
-                col = Movie(info.uv,info.TV_index);
+
+                if(ToggleB(ScreenUVchange.w)) info.uv = texuv;
+                if(ToggleB(ScreenRandamize.w)){
+                    int pattern;
+                    float select = hash13(info.TV_index);
+                    int pattern_number = int(ScreenPaternSlider * 4);
+                    if(pattern_number == 1) select = hash11(info.TV_index.y);
+                    if(pattern_number == 2) select = hash11(info.TV_index.z);
+                    if(pattern_number == 3) select = hash12(mod(info.TV_index.yz,2.0));
+                    float percents = 0.2;
+                    select = mod(select + ScreenOffsetSlider,1.0);
+                    
+
+                    if(select < percents){
+                        col = Movie(info.uv,info.TV_index,combine_layer);
+                    }
+                    else if(select < percents * 2.0){
+                        col = Movie(info.uv,info.TV_index,logo_layer);
+                    }
+                    else if(select < percents * 3.0){
+                        col = Movie(info.uv,info.TV_index,accumulate_layer);
+                    }
+                    else if(select < percents * 4.0){
+                        col = Movie(info.uv,info.TV_index,scene1);
+                    }
+                    else if(select < percents * 5.0){
+                        col = Movie(info.uv,info.TV_index,vertex);
+                    }
+                    else if(select < percents * 6.0){
+                        col = Movie(info.uv,info.TV_index,vertex);
+                    }
+                    else if(select < percents * 7.0){
+                        col = Movie(info.uv,info.TV_index,vertex);
+                    }
+                    else if(select < percents * 8.0){
+                        col = Movie(info.uv,info.TV_index,vertex);
+                    }
+                }
+                else{
+                    col = Movie(info.uv,info.TV_index,combine_layer);
+                }
+
             }
             else{
                 

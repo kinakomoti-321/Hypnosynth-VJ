@@ -20,6 +20,8 @@ uniform sampler2D PlotLogo;
 uniform sampler2D logo_layer;
 uniform sampler2D VAT_test;
 uniform sampler2D accumulate_layer;
+uniform sampler2D VertexCode;
+uniform vec4 VertexCode_res;
 
 uniform sampler1D samples;
 
@@ -121,40 +123,31 @@ void main() {
 
     vec2 UIuv1 = uv_text;
 
-    int text_index = int(mod(time_counter,4.0));
-
-    uv_text += 0.5;
-    vec2 uv1 = (uv_text) * 50.0;
-    
-    float log_time = time * 10.0;
-    uv1.y -= floor(log_time) * 1.2;
-
-    ivec2 index = ivec2(uv1 / vec2(0.8,1.2));
-    uv1.x = mod(uv1.x,0.8);
-    uv1.y = mod(uv1.y,1.2);
-    
-    int isLine = 10 - int(floor(log_time));
-    bool line_mask = (float(LineMaxLength) * fract(log_time) > float(index.x)) ? true : false;
-
-    vec2 rnd_index = vec2(hash11(float(index.y)),hash12(vec2(index)));
-    int max_char = int(rnd_index.x * float(LineMaxLength));
-
-    int char_index = int(rnd_index.y * 94.0 + sliders[3] * 10.0);
-    // int char_index = int(rnd_index.y * 120.0); //Bug
-    if(RedModeON) char_index = 63;
-    char_index = (index.x < max_char) ? char_index : 0;
-    vec3 text_col;
-    text_col = vec3(font(uv1,char_index)) * 0.8; 
+    vec2 textUV = gl_FragCoord.xy / resolution.y;
+    float fontWidth = 0.8;
+    float fontHeight = 1.2;
+    textUV *= 80.0;
+    vec2 logIndex = vec2(floor(textUV.x / fontWidth),floor(textUV.y / fontHeight));
+    logIndex.y += int(time * 5.0);
+    textUV = mod(textUV,vec2(fontWidth,fontHeight));
 
 
-    if(isLine == index.y ) 
-    {
-        text_col *= float(line_mask);
+    vec2 logTextureUV = mod(logIndex / VertexCode_res.xy,1.0);
+    vec2 textDeta = texture(VertexCode,logTextureUV).xy * 15.0;
+    int char_id1 = int(textDeta.x);
+    int char_id2 = int(textDeta.y);
+
+    int char_id = char_id1 + char_id2 * 16 ;
+    if(RedModeON) char_id = 63;
+
+    float BugCharp = hash12(logIndex);
+    if(BugCharp > 0.9){
+        char_id = int(mod(float(char_id + hash12(logIndex * 10.0) * 100.0 + time * 10),97));
     }
-    else{
-        text_col *= float(index.x < LineMaxLength);
-        text_col *= float(index.y > isLine);
-    }
+
+    vec3 text_col = font(textUV,char_id);
+    // col = text_color;
+    // vec3 text_col;
 
     UIuv1 += vec2(0.45,0.0);
     float UV1_Window_sdf = sdBox(UIuv1,vec2(0.2,0.3));
@@ -218,16 +211,24 @@ void main() {
         col += vec3(1.0);
     }
     UV3 += vec2(0.03,0.0);
-    chars = int[](0,13,25,31,24,30,15,28);
+    chars = int[](0,0,0,0,0,37,23,26);
     float UV3Offset = 0.07;
     for(int i = 0; i < 8; i++){
-        col += CharAndNumber(UV3*2.0 + vec2(0.35,UV3Offset * i),chars,int(i + b_beat.w));
+        float value = hash11(floor(time * 4) + i) * 100.0;
+        col += CharAndNumber(UV3*2.0 + vec2(0.35,UV3Offset * i),chars,int(value));
+    }
+
+    float SpectrumUI_Offset = 0.03;
+    for(int i = 0; i < 12; i++){
+        float value = hash11(float(i + floor(time * 4.0) * 100));
+        col += sliderUI(UV3 + vec2(-0.15,i * SpectrumUI_Offset -0.172),float(value > 0.5),vec2(0.05,SpectrumUI_Offset * 0.5));
     }
 
 
     if(ToggleB(UI_Button.w)){col = vec3(0.0);}
 
     //---------------------------------------
+
 
     // col *= vec3(0.0,0.7,0.0);
     if(ToggleB(LogoButton.w)){col = mix(col,vec3(1.0),plogo.w);}

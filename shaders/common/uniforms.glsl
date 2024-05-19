@@ -32,7 +32,11 @@ uniform vec4 buttons[32];
 #define TV_SceneChange buttons[13]
 #define TV_MoveButton buttons[14]
 
+#define ScreenRandamize buttons[15]
+#define ScreenUVchange buttons[17]
 #define TV_FOVSlider sliders[8]
+#define ScreenOffsetSlider sliders[10]
+#define ScreenPaternSlider sliders[11]
 
 #define NoiseSlider 1.0 - sliders[13]
 
@@ -44,6 +48,7 @@ uniform vec4 buttons[32];
 #define PixelFluid_Button buttons[18]
 #define GlassFilter_Button buttons[19]
 #define MFButton buttons[20]
+
 
 //PostProcess
 // #define AbsorbSlider sliders[15]

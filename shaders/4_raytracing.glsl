@@ -12,6 +12,7 @@ out vec4 color;
 #pragma include "./shaders/common/constant.glsl"
 
 uniform sampler2D raytracing;
+uniform sampler2D logo_layer;
 uniform sampler2D IBL;
 uint seed;
 
@@ -496,13 +497,12 @@ void main(){
     scene_number = int(Raytracing_SceneSlider * 4);
     
     vec2 rotuv = uv * rot(hash11(b_beat.w) * TAU);
+
     // if(rotuv.x > 0.0){
     //     scene_number = 1;
     // }
     if(RedModeON) caostic += 1; 
-    if(ToggleB(Logo_MaskButton.w)){
-        
-    }
+
 
     vec3 prePos = hash31(b_beat.w - 1.0); 
     vec3 nowPos = hash31(b_beat.w);
@@ -540,5 +540,9 @@ void main(){
 
     // finish_col = (abs(rotuv.x) < 0.002) ? vec4(0.0)  : finish_col;
 
+    if(ToggleB(Logo_MaskButton.w)){
+        vec4 logo_mask = texture(logo_layer,tuv);
+        finish_col += logo_mask; 
+    }
     color = finish_col;
 }

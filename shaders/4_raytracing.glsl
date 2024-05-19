@@ -527,9 +527,7 @@ void main(){
 
     vec3 col = vec3(0.0);
     
-    if(ToggleB(Raytracing_Button.w)){
-        col = pathtrace(ro,rd);
-    }
+    col = pathtrace(ro,rd);
 
     vec4 accmu_tex = texture(raytracing,tuv);
     vec4 finish_col = vec4(col,1.0);
@@ -540,9 +538,9 @@ void main(){
 
     // finish_col = (abs(rotuv.x) < 0.002) ? vec4(0.0)  : finish_col;
 
-    if(ToggleB(Logo_MaskButton.w)){
-        vec4 logo_mask = texture(logo_layer,tuv);
-        finish_col += logo_mask; 
-    }
+    // if(ToggleB(Logo_MaskButton.w)){
+    //     vec4 logo_mask = texture(logo_layer,tuv);
+    //     finish_col += logo_mask; 
+    // }
     color = finish_col;
 }

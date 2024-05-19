@@ -21,7 +21,11 @@ uniform sampler2D logo_layer;
 uniform sampler2D VAT_test;
 uniform sampler2D accumulate_layer;
 uniform sampler2D VertexCode;
+uniform sampler2D SceneCode;
+uniform sampler2D RaytracingCode;
 uniform vec4 VertexCode_res;
+uniform vec4 SceneCode_res;
+uniform vec4 RaytracingCode_res;
 
 uniform sampler1D samples;
 
@@ -115,8 +119,6 @@ void main() {
     if(ToggleB(SceneButton.w)) channelID = 2;
     if(ToggleB(Raytracing_Button.w)) channelID = 3;
 
-
-
     if(logouv.x < 0.0 || logouv.x >= 0.999) plogo = vec4(0.0);
 
     vec2 uv_text = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
@@ -131,9 +133,20 @@ void main() {
     logIndex.y += int(time * 5.0);
     textUV = mod(textUV,vec2(fontWidth,fontHeight));
 
-
-    vec2 logTextureUV = mod(logIndex / VertexCode_res.xy,1.0);
-    vec2 textDeta = texture(VertexCode,logTextureUV).xy * 15.0;
+    vec2 textDeta = vec2(0.0);
+    if(channelID == 1){
+        vec2 logTextureUV = mod(logIndex / VertexCode_res.xy,1.0);
+        textDeta = texture(VertexCode,logTextureUV).xy * 15.0;
+    }
+    else if(channelID == 2){
+        vec2 logTextureUV = mod(logIndex / SceneCode_res.xy,1.0);
+        textDeta = texture(SceneCode,logTextureUV).xy * 15.0;
+    }
+    else if(channelID == 3){
+        vec2 logTextureUV = mod(logIndex / RaytracingCode_res.xy,1.0);
+        textDeta = texture(RaytracingCode,logTextureUV).xy * 15.0;
+    }
+    
     int char_id1 = int(textDeta.x);
     int char_id2 = int(textDeta.y);
 
@@ -146,8 +159,6 @@ void main() {
     }
 
     vec3 text_col = font(textUV,char_id);
-    // col = text_color;
-    // vec3 text_col;
 
     UIuv1 += vec2(0.45,0.0);
     float UV1_Window_sdf = sdBox(UIuv1,vec2(0.2,0.3));

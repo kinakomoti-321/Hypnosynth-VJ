@@ -106,6 +106,9 @@ void main() {
         back_mask = vec3(1.0);
     }
 
+    float iTime = time + b_beat.w + powEase(b_beat.y,10);
+    if(RedModeON) iTime *= 10.0;
+
     if(int(b_beat.w) % 4 == 0) back_mask = vec3(1.0);
     if(ToggleB(Logo_MaskButton.w - 1.0)) back_mask += logo_Mask.x; 
 
@@ -116,8 +119,7 @@ void main() {
     int x = int(gl_FragCoord.x);
     int y = int(gl_FragCoord.y + time * 10.0);
     int r = (x+y)^(x-y);
-
-    bool b = abs(r*r*r + y + int(time * (10.0 + logo_Mask.x * 100.0))) % int(hash11(b_beat.w) * 1892.0 + 500.0) < (1000 * sliders[5] + logo_Mask.x * 500);
+    bool b = abs(r*r*r + y + int(iTime * (30.0 + logo_Mask.x * 100.0))) % int(hash11(b_beat.w) * 1892.0 + 500.0) < (1000 * sliders[5] + logo_Mask.x * 500);
     vec3 circuit_col = b? vec3(1.0) : vec3(0.0);
 
     if(ToggleB(SceneCircuit.w)) col = circuit_col;
@@ -125,8 +127,6 @@ void main() {
     vec2 uvTriCircuit = (gl_FragCoord.xy - resolution.xy * 0.5) / resolution.y;
     float offset = 0.0;
     offset = logo_Mask.x;
-    float iTime = time + b_beat.w + powEase(b_beat.y,10);
-    if(RedModeON) iTime *= 10.0;
     vec3 TriColor = gem_pattern(uvTriCircuit,offset,iTime);
 
     if(ToggleB(SceneTriCircuit.w)) {

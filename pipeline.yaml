@@ -2,7 +2,7 @@ stages:
   - vs: "./shaders/1_vertex.glsl"
     mode: "LINE_STRIP"
     line_width: 2
-    count: 1000
+    count: 100
     target: "vertex"
     
   - fs: "./shaders/2_scene1.glsl"
@@ -64,7 +64,13 @@ images:
      filter: nearest
    - path: "./img/IBL.png"
      name: "IBL"
-     filter: nearest
-   - path: "./img/vertex_code.png"
+    #  filter: nearest
+   - path: "./img/Code_Vertex.png"
      name: "VertexCode"
+     filter: nearest
+   - path: "./img/Code_Scene1.png"
+     name: "SceneCode"
+     filter: nearest
+   - path: "./img/Code_Raytracing.png"
+     name: "RaytracingCode"
      filter: nearest

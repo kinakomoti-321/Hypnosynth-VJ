@@ -16,7 +16,9 @@ uniform sampler2D VAT_test;
 
 uniform vec4 VAT_test_res;
 
-#define VertexRrandomSlider sliders[0]
+#define VertexRrandomSlider sliders[1]
+#define VertexSceneSlider sliders[0]
+//naosenakatta...
 float ConvertBinaryToFloat(vec4 binary_col){
     uint b1 = uint(binary_col.r * 255.0 + 0.5);
     uint b2 = uint(binary_col.g * 255.0 + 0.5);
@@ -55,6 +57,14 @@ vec3 GetVATPosition(uint vertID){
     vec3 position = vec3(x,y,z); 
     return position;
 }
+vec3 Sphere(float f){
+    vec3 dir = vec3(0.0,1.0,0.0);
+    dir.xy = rotate(dir.xy,f * PI * (7.0 +  mod(time * 0.0002 + hash11(b_beat.w),10.0)));
+    dir.yz = rotate(dir.yz,f * PI * (4.0 + mod(time * 0.0001 + b_beat.w * 0.001,10.0)));
+
+    return dir;
+}
+
 
 void main() {
     float factor = float(gl_VertexID) / vertex_count;
@@ -69,14 +79,18 @@ void main() {
     int VertID = (gl_VertexID < maxVertID) ? gl_VertexID : maxVertID ;
 
     vec3 rand = easeHash31(b_beat.w,b_beat.y,10);
-    vec3 p =GetVATPosition(uint(VertID)) * 0.1;
+    //vec3 p =GetVATPosition(uint(VertID)) * 0.1;
+    // vec3 p = getBoxPosition(gl_VertexID) * 0.1;
+    vec3 p = vec3(x,y,z) * 0.2;
+    int Version = int(VertexSceneSlider * 3);
+    if(Version == 1) p = Sphere(factor + time) * 0.3;
     float iTime = time;
-    float randomness = stepFunc(VertexRrandomSlider,0.25);
+    float randomness = stepFunc(VertexRrandomSlider,0.25) * 0.1;
     if(RedModeON){
         randomness = 1.0;
         iTime *= 10.0 *time;
     }
-    p += randomness * (hash34(vec4(p,floor(iTime))) * 2.0 - 1.0);
+    p += randomness * (hash34(vec4(p,floor(iTime) + float(gl_VertexID))) * 2.0 - 1.0);
     p.xz = rotate(p.xz,rand.y * TAU * 1.5 + iTime * 0.1);
     p.yz = rotate(p.yz,rand.x * TAU * 1.5);
 

@@ -58,4 +58,3 @@ uniform vec4 buttons[32];
 #define Laplacian_Button buttons[21]
 #define ParupunteFilter_Button button[22] //Dengerous
 #define FakePixelFilter_Button buttons[23]
-//#define ParupunteFilter_Button button[23] //Dengerous

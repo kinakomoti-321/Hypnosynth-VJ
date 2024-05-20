@@ -33,8 +33,8 @@ vec3 magneticField(vec3 pp,vec3 mp,vec3 pos,float magne){
     vec3 r = pos - ((pp + mp) * 0.5);
     float len_r = dot(r,r);
 
-    //1/r^3の項は省いている
-    return moment - 3.0 * (dot(moment,r)) * r / len_r;
+    //1/r^3の項は省いている こっちの方が絵的に良い
+    return (moment - 3.0 * (dot(moment,r)) * r / len_r);
 }
 
 vec2 MagneticFilter(vec2 uv){

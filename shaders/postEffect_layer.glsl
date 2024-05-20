@@ -89,7 +89,7 @@ void main() {
         col = Laplacian_filter(bloom_combine,texuv,offsets);
     }
 
-
+    //https://qiita.com/CitronSeason/items/df80be297e29533916da
     if(ToggleB(FakePixelFilter_Button.w)){
         vec2 dxy = 1.0 / resolution.xy; 
         vec3 maxCol = vec3(0);

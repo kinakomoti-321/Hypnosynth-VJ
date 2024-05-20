@@ -1,4 +1,5 @@
 # Hypnosynth VJ
+![](./img/ScreenShot.png)
 This is a Generative VJ program produced for a VRChat club event, "Hypnosynth"
 https://x.com/rikupi_vrc/status/1788871614605742327
 
